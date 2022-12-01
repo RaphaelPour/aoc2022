@@ -12,12 +12,13 @@ func maxCalories(data []string, n int) int {
 	calories := make([]int, 0)
 	currentCalories := 0
 	for i, row := range data {
-		if row == "" || i == len(data)-1 {
-			calories = append(calories, currentCalories)
-			currentCalories = 0
+		if row != "" && i < len(data)-1 {
+			currentCalories += strings.ToInt(row)
 			continue
 		}
-		currentCalories += strings.ToInt(row)
+
+		calories = append(calories, currentCalories)
+		currentCalories = 0
 	}
 
 	return math.Sum(math.MaxN(calories, n))
