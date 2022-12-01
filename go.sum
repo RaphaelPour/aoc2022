@@ -1,5 +1,9 @@
 github.com/MarkusFreitag/advent-of-code v0.0.0-20221129165003-2865f0395ed0 h1:O5tJXiT1QDx2K2JpicS9ujDMiSZn9nhEdT/8bJ2QywQ=
 github.com/MarkusFreitag/advent-of-code v0.0.0-20221129165003-2865f0395ed0/go.mod h1:/dPsMT8aE8ARtgodnVJy32zNlHM9lf0UrjGPuq2rbNQ=
+github.com/RaphaelPour/stellar v0.0.0-20221018212556-d337f9cfb467 h1:tzfL5+d6rDiSbLCB3tWDYVtd3G6pLGyZp/4kwcVU9Yc=
+github.com/RaphaelPour/stellar v0.0.0-20221018212556-d337f9cfb467/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
+github.com/RaphaelPour/stellar v0.0.0-20221201053810-156793ae3fc6 h1:N8TP1WtivgO5hciV86kuycXWbinhdB8xQklBB/2/Iww=
+github.com/RaphaelPour/stellar v0.0.0-20221201053810-156793ae3fc6/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
 github.com/fatih/color v1.13.0 h1:8LOYc1KYPPmyKMuN8QV2DNRWNbLo6LZ0iLs8+mlH53w=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/mattn/go-colorable v0.1.9 h1:sqDoxXbdeALODt0DAeJCVp38ps9ZogZEAXjus69YV3U=
