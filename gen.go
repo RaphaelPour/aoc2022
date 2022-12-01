@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	YEAR = 2021
+	YEAR = 2022
 )
 
 func main() {
