@@ -23,7 +23,13 @@ func main() {
 	fmt.Printf("downloading %d/%d\n", day, YEAR)
 
 	/* download input */
-	input, err := util.InputFromURL(YEAR, day)
+	input, err := util.InputFromURL(
+		YEAR,
+		day,
+		util.WithAoCUserAgent(
+			"aoc@raphaelpour.de",
+			"github.com/RaphaelPour/aoc2022",
+		))
 	if err != nil {
 		color.Red("error getting input: %s", err)
 		return

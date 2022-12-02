@@ -1,5 +1,7 @@
 github.com/MarkusFreitag/advent-of-code v0.0.0-20221129165003-2865f0395ed0 h1:O5tJXiT1QDx2K2JpicS9ujDMiSZn9nhEdT/8bJ2QywQ=
 github.com/MarkusFreitag/advent-of-code v0.0.0-20221129165003-2865f0395ed0/go.mod h1:/dPsMT8aE8ARtgodnVJy32zNlHM9lf0UrjGPuq2rbNQ=
+github.com/MarkusFreitag/advent-of-code v0.0.0-20221202052959-b12c34155f4b h1:kuxnOO2crZv0WuNkY/w8yV1g+mleqfQrOTgAiRbZZvU=
+github.com/MarkusFreitag/advent-of-code v0.0.0-20221202052959-b12c34155f4b/go.mod h1:/dPsMT8aE8ARtgodnVJy32zNlHM9lf0UrjGPuq2rbNQ=
 github.com/RaphaelPour/stellar v0.0.0-20221018212556-d337f9cfb467 h1:tzfL5+d6rDiSbLCB3tWDYVtd3G6pLGyZp/4kwcVU9Yc=
 github.com/RaphaelPour/stellar v0.0.0-20221018212556-d337f9cfb467/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
 github.com/RaphaelPour/stellar v0.0.0-20221201053810-156793ae3fc6 h1:N8TP1WtivgO5hciV86kuycXWbinhdB8xQklBB/2/Iww=
