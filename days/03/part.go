@@ -89,9 +89,6 @@ func part2(data []string) int {
 
 func main() {
 	data := input.LoadString("input")
-	// data := input.LoadDefaultInt()
-	// data := input.LoadInt("input")
-	// data := input.LoadDefaultString()
 
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(data))
