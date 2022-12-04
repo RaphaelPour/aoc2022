@@ -32,27 +32,47 @@ func (r1 Range) Contains(r2 Range) bool {
 	return false
 }
 
-func (r1 Range) Overlap(r2 Range) bool {
+func (r1 Range) Overlaps(r2 Range) bool {
 	if r1.Contains(r2) {
 		return true
 	}
 
+	/*
+	 * xxx
+	 *  x
+	 */
 	if r1.from <= r2.from && r1.to >= r2.to {
 		return true
 	}
 
+	/*
+	 *  x
+	 * xxx
+	 */
 	if r1.from <= r2.from && r1.to >= r2.from {
 		return true
 	}
 
+	/*
+	 *  xx
+	 * xx
+	 */
 	if r2.from <= r1.from && r2.to >= r1.from {
 		return true
 	}
 
+	/*
+	 * xx
+	 *  xx
+	 */
 	if r2.from <= r1.from && r2.to >= r1.to {
 		return true
 	}
 
+	/*
+	 * xx
+	 *  xx
+	 */
 	if r1.to == r2.from || r2.to == r1.from {
 		return true
 	}
@@ -103,7 +123,7 @@ func part2(data []string) int {
 			panic(fmt.Sprintf("error parsing second pair %s: %s", pair, err))
 		}
 
-		if r1.Overlap(*r2) {
+		if r1.Overlaps(*r2) {
 			sum += 1
 		}
 	}
@@ -114,7 +134,6 @@ func main() {
 	data := input.LoadString("input")
 
 	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println("bad: 544")
 	fmt.Println(part1(data))
 
 	fmt.Println("== [ PART 2 ] ==")
