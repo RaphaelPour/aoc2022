@@ -5,80 +5,9 @@ import (
 	"strings"
 
 	"github.com/RaphaelPour/stellar/input"
+	"github.com/RaphaelPour/stellar/span"
 	s_strings "github.com/RaphaelPour/stellar/strings"
 )
-
-type Range struct {
-	from, to int
-}
-
-func NewRange(rawRange string) (*Range, error) {
-	rawParts := strings.Split(rawRange, "-")
-	if len(rawParts) != 2 {
-		return nil, fmt.Errorf("error parsing '%s': must have two numbers split with -", rawRange)
-	}
-
-	return &Range{s_strings.ToInt(rawParts[0]), s_strings.ToInt(rawParts[1])}, nil
-}
-
-func (r1 Range) Contains(r2 Range) bool {
-	if r1.from <= r2.from && r1.to >= r2.to {
-		return true
-	}
-
-	if r2.from <= r1.from && r2.to >= r1.to {
-		return true
-	}
-	return false
-}
-
-func (r1 Range) Overlaps(r2 Range) bool {
-	if r1.Contains(r2) {
-		return true
-	}
-
-	/*
-	 * xxx
-	 *  x
-	 */
-	if r1.from <= r2.from && r1.to >= r2.to {
-		return true
-	}
-
-	/*
-	 *  x
-	 * xxx
-	 */
-	if r1.from <= r2.from && r1.to >= r2.from {
-		return true
-	}
-
-	/*
-	 *  xx
-	 * xx
-	 */
-	if r2.from <= r1.from && r2.to >= r1.from {
-		return true
-	}
-
-	/*
-	 * xx
-	 *  xx
-	 */
-	if r2.from <= r1.from && r2.to >= r1.to {
-		return true
-	}
-
-	/*
-	 * xx
-	 *  xx
-	 */
-	if r1.to == r2.from || r2.to == r1.from {
-		return true
-	}
-
-	return false
-}
 
 func part1(data []string) int {
 	sum := 0
@@ -88,17 +17,19 @@ func part1(data []string) int {
 			panic(fmt.Sprintf("pair should have two elements, got %d ('%s')", len(pair), pair))
 		}
 
-		r1, err := NewRange(pair[0])
-		if err != nil {
-			panic(fmt.Sprintf("error parsing first pair %s: %s", pair, err))
+		rawParts := strings.Split(pair[0], "-")
+		if len(rawParts) != 2 {
+			panic(fmt.Errorf("error parsing first span '%s': must have two numbers split with -", pair[2]))
 		}
+		s1 := &span.Span{s_strings.ToInt(rawParts[0]), s_strings.ToInt(rawParts[1])}
 
-		r2, err := NewRange(pair[1])
-		if err != nil {
-			panic(fmt.Sprintf("error parsing second pair %s: %s", pair, err))
+		rawParts = strings.Split(pair[1], "-")
+		if len(rawParts) != 2 {
+			panic(fmt.Errorf("error parsing second span '%s': must have two numbers split with -", pair[1]))
 		}
+		s2 := &span.Span{s_strings.ToInt(rawParts[0]), s_strings.ToInt(rawParts[1])}
 
-		if r1.Contains(*r2) {
+		if s1.Contains(*s2) {
 			sum += 1
 		}
 	}
@@ -113,17 +44,19 @@ func part2(data []string) int {
 			panic(fmt.Sprintf("pair should have two elements, got %d ('%s')", len(pair), pair))
 		}
 
-		r1, err := NewRange(pair[0])
-		if err != nil {
-			panic(fmt.Sprintf("error parsing first pair %s: %s", pair, err))
+		rawParts := strings.Split(pair[0], "-")
+		if len(rawParts) != 2 {
+			panic(fmt.Errorf("error parsing first span '%s': must have two numbers split with -", pair[2]))
 		}
+		s1 := &span.Span{s_strings.ToInt(rawParts[0]), s_strings.ToInt(rawParts[1])}
 
-		r2, err := NewRange(pair[1])
-		if err != nil {
-			panic(fmt.Sprintf("error parsing second pair %s: %s", pair, err))
+		rawParts = strings.Split(pair[1], "-")
+		if len(rawParts) != 2 {
+			panic(fmt.Errorf("error parsing second span '%s': must have two numbers split with -", pair[1]))
 		}
+		s2 := &span.Span{s_strings.ToInt(rawParts[0]), s_strings.ToInt(rawParts[1])}
 
-		if r1.Overlaps(*r2) {
+		if s1.Overlaps(*s2) {
 			sum += 1
 		}
 	}

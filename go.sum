@@ -6,6 +6,10 @@ github.com/RaphaelPour/stellar v0.0.0-20221018212556-d337f9cfb467 h1:tzfL5+d6rDi
 github.com/RaphaelPour/stellar v0.0.0-20221018212556-d337f9cfb467/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
 github.com/RaphaelPour/stellar v0.0.0-20221201053810-156793ae3fc6 h1:N8TP1WtivgO5hciV86kuycXWbinhdB8xQklBB/2/Iww=
 github.com/RaphaelPour/stellar v0.0.0-20221201053810-156793ae3fc6/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
+github.com/RaphaelPour/stellar v0.0.0-20221204055025-6417ba849e0d h1:koqzzhbLsRTTspEZeuEWfIHCoJxATcIU+Tn0xZ4PSUs=
+github.com/RaphaelPour/stellar v0.0.0-20221204055025-6417ba849e0d/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
+github.com/RaphaelPour/stellar v0.0.0-20221204055842-1337fa9d0ab1 h1:t30PcNpIs+wk8CghmaVeh8SrcDhFiw9xKm0SauZLriE=
+github.com/RaphaelPour/stellar v0.0.0-20221204055842-1337fa9d0ab1/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
