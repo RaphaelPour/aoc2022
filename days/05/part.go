@@ -6,35 +6,9 @@ import (
 	"strings"
 	"github.com/RaphaelPour/stellar/input"
 	s_strings "github.com/RaphaelPour/stellar/strings"
+	"github.com/RaphaelPour/stellar/stack"
+	
 )
-
-type Stack[T any] struct {
-	items []T
-}
-
-func (s *Stack[T]) Push(item T) {
-	s.items = append(s.items, item) 
-}
-
-func (s *Stack[T]) PushAhead(item T) {
-	s.items = append([]T{item}, s.items...)
-}
-
-func (s *Stack[T]) PushN(items []T) {
-	s.items = append(s.items, items...)
-}
-
-func (s *Stack[T]) Pop() T {
-	item := s.items[len(s.items)-1]
-	s.items = s.items[:len(s.items)-1]
-	return item
-}
-
-func (s *Stack[T]) PopN(l int) []T{
-	items := append([]T{},s.items[len(s.items)-l:]...)
-	s.items = s.items[:len(s.items)-l]
-	return items
-}
 
 func part1(data []string) int {
 	/* Example regex match
@@ -44,7 +18,7 @@ func part1(data []string) int {
      * [Z] [M] [P]: [][]string{[]string{"[Z] ", "[Z]", "Z"}, []string{"[M] ", "[M]", "M"}, []string{"[P]", "[P]", "P"}}
 	 */
 	linePattern := regexp.MustCompile(`(\s\s\s|\[([A-Z])\])\s?`)
-	var stacks []Stack[string]
+	var stacks []stack.Stack[string]
 	var skip int
 	for i, line := range data {
 		if strings.HasPrefix(line," 1") {
@@ -59,7 +33,7 @@ func part1(data []string) int {
 			// create all stacks at the first line,
 			// the regex should result ALWAYS with the same amount
 			// of results but some results may be empty.
-			stacks = make([]Stack[string],len(m))
+			stacks = make([]stack.Stack[string],len(m))
 		} else if len(m) == 0 {
 			// we reached the 
 		} else if len(m) != len(stacks){
@@ -116,7 +90,7 @@ func part2(data []string) int {
      * [Z] [M] [P]: [][]string{[]string{"[Z] ", "[Z]", "Z"}, []string{"[M] ", "[M]", "M"}, []string{"[P]", "[P]", "P"}}
 	 */
 	linePattern := regexp.MustCompile(`(\s\s\s|\[([A-Z])\])\s?`)
-	var stacks []Stack[string]
+	var stacks []stack.Stack[string]
 	var skip int
 	for i, line := range data {
 		if strings.HasPrefix(line," 1") {
@@ -131,7 +105,7 @@ func part2(data []string) int {
 			// create all stacks at the first line,
 			// the regex should result ALWAYS with the same amount
 			// of results but some results may be empty.
-			stacks = make([]Stack[string],len(m))
+			stacks = make([]stack.Stack[string],len(m))
 		} else if len(m) == 0 {
 			// we reached the 
 		} else if len(m) != len(stacks){

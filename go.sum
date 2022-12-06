@@ -2,6 +2,8 @@ github.com/MarkusFreitag/advent-of-code v0.0.0-20221205082409-588c280d3598 h1:jH
 github.com/MarkusFreitag/advent-of-code v0.0.0-20221205082409-588c280d3598/go.mod h1:/dPsMT8aE8ARtgodnVJy32zNlHM9lf0UrjGPuq2rbNQ=
 github.com/RaphaelPour/stellar v0.0.0-20221204055842-1337fa9d0ab1 h1:t30PcNpIs+wk8CghmaVeh8SrcDhFiw9xKm0SauZLriE=
 github.com/RaphaelPour/stellar v0.0.0-20221204055842-1337fa9d0ab1/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
+github.com/RaphaelPour/stellar v0.0.0-20221206212023-f19d5f604f37 h1:AE99Wov2e7UtRBJnoUhR2plHAtWZloTxkGY1D7Bx83Y=
+github.com/RaphaelPour/stellar v0.0.0-20221206212023-f19d5f604f37/go.mod h1:Hoe3brR7XzDB+0qQqfgwMqhdomrrg94z8a4lno8WVtM=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
