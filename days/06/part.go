@@ -12,7 +12,6 @@ type Window struct {
 }
 
 func (w *Window) Add(item string) {
-	fmt.Println(w.data)
 	if len(w.data) >= w.length {
 		w.data = w.data[1:len(w.data)]
 	}
@@ -27,9 +26,6 @@ func (w *Window) IsUnique() bool {
 
 	for i := 0; i < len(w.data)-1; i++ {
 		for j := i + 1; j < len(w.data); j++ {
-			if i == j {
-				continue
-			}
 			if w.data[i] == w.data[j] {
 				return false
 			}
@@ -67,13 +63,13 @@ func part2(data string) int {
 }
 
 func main() {
-	data := input.LoadString("input")
+	data := input.LoadString("input")[0]
 
 	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println(part1(data[0]))
+	fmt.Println(part1(data))
 
 	fmt.Println("bad: 1537")
 
 	fmt.Println("== [ PART 2 ] ==")
-	fmt.Println(part2(data[0]))
+	fmt.Println(part2(data))
 }
