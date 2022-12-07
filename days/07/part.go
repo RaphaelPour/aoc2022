@@ -17,7 +17,6 @@ type Directory struct {
 	name        string
 	files       map[string]int
 	directories map[string]*Directory
-	cached_size int
 }
 
 func NewDirectory(name string) *Directory {
@@ -25,7 +24,6 @@ func NewDirectory(name string) *Directory {
 		name:        name,
 		files:       make(map[string]int),
 		directories: make(map[string]*Directory),
-		cached_size: -1,
 	}
 }
 
@@ -58,10 +56,6 @@ func (d Directory) Ls(ident int) string {
 }
 
 func (d Directory) Size() int {
-	/*if d.cached_size > -1 {
-		return d.cached_size
-	}*/
-
 	sum := 0
 	for _, size := range d.files {
 		sum += size
@@ -70,7 +64,6 @@ func (d Directory) Size() int {
 	for _, dir := range d.directories {
 		sum += dir.Size()
 	}
-	d.cached_size = sum
 	return sum
 }
 
@@ -95,7 +88,6 @@ func part1(data []string) int {
 			if current.parent == nil {
 				panic(fmt.Sprintf("error going up. Current directory %s has no parent", current.name))
 			}
-			// fmt.Println("cd", current.name, "to", current.parent.name)
 			current = current.parent
 			continue
 		} else if strings.HasPrefix(line, "$ cd") {
@@ -106,18 +98,15 @@ func part1(data []string) int {
 			if root == nil {
 				root = newDir
 				current = newDir
-				// fmt.Println("init tree with", name)
 				continue
 			}
 
 			newDir.parent = current
 			current.directories[name] = newDir
-			// fmt.Println("cd", current.name, "to", newDir.name)
 			current = newDir
 			continue
 		} else if match := re.FindStringSubmatch(line); len(match) == 3 {
 			current.files[match[2]] = s_strings.ToInt(match[1])
-			// fmt.Println("add file", match[2], "to", current.name)
 			continue
 		} else if strings.HasPrefix(line, "dir") || strings.HasPrefix(line, "$ ls") {
 			continue
@@ -126,11 +115,8 @@ func part1(data []string) int {
 		panic(fmt.Sprintf("Unknown line '%s'", line))
 	}
 
-	fmt.Println(root.Ls(0))
-
 	total := 0
 	for _, dir := range root.Collect(func(d Directory) bool { return d.Size() <= 100000 }) {
-		fmt.Println(dir)
 		total += dir.Size()
 	}
 	return total
@@ -146,7 +132,6 @@ func part2(data []string) int {
 			if current.parent == nil {
 				panic(fmt.Sprintf("error going up. Current directory %s has no parent", current.name))
 			}
-			// fmt.Println("cd", current.name, "to", current.parent.name)
 			current = current.parent
 			continue
 		} else if strings.HasPrefix(line, "$ cd") {
@@ -157,18 +142,15 @@ func part2(data []string) int {
 			if root == nil {
 				root = newDir
 				current = newDir
-				// fmt.Println("init tree with", name)
 				continue
 			}
 
 			newDir.parent = current
 			current.directories[name] = newDir
-			// fmt.Println("cd", current.name, "to", newDir.name)
 			current = newDir
 			continue
 		} else if match := re.FindStringSubmatch(line); len(match) == 3 {
 			current.files[match[2]] = s_strings.ToInt(match[1])
-			// fmt.Println("add file", match[2], "to", current.name)
 			continue
 		} else if strings.HasPrefix(line, "dir") || strings.HasPrefix(line, "$ ls") {
 			continue
@@ -181,7 +163,6 @@ func part2(data []string) int {
 	freeSpace := 70000000 - root.Size()
 	goal := 30000000
 	for _, dir := range root.Collect(func(d Directory) bool { return freeSpace+d.Size() >= goal }) {
-		fmt.Println(dir.name, dir.Size())
 		if candidate == nil {
 			candidate = dir
 			continue
