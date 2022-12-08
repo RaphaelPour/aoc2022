@@ -17,13 +17,9 @@ func (g Grid) VisibleCount() int {
 	for y := 0; y < len(g.fields); y++ {
 		for x := 0; x < len(g.fields[0]); x++ {
 			if g.TreeVisible(x, y) {
-				fmt.Printf("%d ", g.fields[y][x])
 				sum += 1
-			} else {
-				fmt.Print(". ")
 			}
 		}
-		fmt.Println("")
 	}
 	return sum
 }
@@ -34,9 +30,9 @@ func (g Grid) TreeVisible(x, y int) bool {
 	}
 
 	// check if tree is at the border
-	/*if x == 0 || x == len(g.fields)-1 || y == 0 || y == len(g.fields[0])-1 {
+	if x == 0 || x == len(g.fields)-1 || y == 0 || y == len(g.fields[0])-1 {
 		return true
-	}*/
+	}
 
 	// left
 	isVisible := true
@@ -85,7 +81,7 @@ func (g Grid) TreeVisible(x, y int) bool {
 	return isVisible
 }
 
-func (g Grid) ScenicScore() int {
+func (g Grid) MaxScenicScore() int {
 	score := 0
 	for y := 0; y < len(g.fields); y++ {
 		for x := 0; x < len(g.fields[0]); x++ {
@@ -93,9 +89,7 @@ func (g Grid) ScenicScore() int {
 			if dist > score {
 				score = dist
 			}
-			fmt.Printf("%2d ", dist)
 		}
-		fmt.Println("")
 	}
 	return score
 }
@@ -105,7 +99,6 @@ func (g Grid) ViewingDistance(x, y int) int {
 		panic(fmt.Sprintf("Coordinates out of range: %d/%d", x, y))
 	}
 
-	fmt.Println("lel")
 	if x == 0 || x == len(g.fields)-1 || y == 0 || y == len(g.fields[0])-1 {
 		return 0
 	}
@@ -145,58 +138,28 @@ func (g Grid) ViewingDistance(x, y int) int {
 	return score
 }
 
-func part1(data []string) int {
-	grid := Grid{}
-	grid.fields = make([][]int, 0)
-	for _, line := range data {
-		if len(grid.fields) > 0 && len(line) != len(grid.fields[0]) {
-			panic(fmt.Sprintf(
-				"bad line length: expected %d, got %d",
-				len(grid.fields[0]),
-				len(line),
-			))
-		}
-		lineFields := make([]int, len(line))
-		for i, rawNum := range line {
-			num := s_strings.ToInt(string(rawNum))
-			lineFields[i] = num
-		}
-		grid.fields = append(grid.fields, lineFields)
-	}
-
-	fmt.Println(grid.fields)
-	return grid.VisibleCount()
-}
-
-func part2(data []string) int {
-	grid := Grid{}
-	grid.fields = make([][]int, 0)
-	for _, line := range data {
-		if len(grid.fields) > 0 && len(line) != len(grid.fields[0]) {
-			panic(fmt.Sprintf(
-				"bad line length: expected %d, got %d",
-				len(grid.fields[0]),
-				len(line),
-			))
-		}
-		lineFields := make([]int, len(line))
-		for i, rawNum := range line {
-			num := s_strings.ToInt(string(rawNum))
-			lineFields[i] = num
-		}
-		grid.fields = append(grid.fields, lineFields)
-	}
-	grid.ViewingDistance(2, 2)
-	return grid.ScenicScore()
-	// return 0
-}
-
 func main() {
-	data := input.LoadString("input")
+	grid := Grid{}
+	grid.fields = make([][]int, 0)
+	for _, line := range input.LoadString("input") {
+		if len(grid.fields) > 0 && len(line) != len(grid.fields[0]) {
+			panic(fmt.Sprintf(
+				"bad line length: expected %d, got %d",
+				len(grid.fields[0]),
+				len(line),
+			))
+		}
+		lineFields := make([]int, len(line))
+		for i, rawNum := range line {
+			num := s_strings.ToInt(string(rawNum))
+			lineFields[i] = num
+		}
+		grid.fields = append(grid.fields, lineFields)
+	}
 
 	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println(part1(data))
+	fmt.Println(grid.VisibleCount())
 
 	fmt.Println("== [ PART 2 ] ==")
-	fmt.Println(part2(data))
+	fmt.Println(grid.MaxScenicScore())
 }
