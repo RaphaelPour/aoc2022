@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	
+
 	"github.com/RaphaelPour/stellar/input"
 )
 
@@ -21,7 +21,7 @@ func TestPoint(t *testing.T) {
 	require.Equal(t, 1.0, p1.EuclideanDistance(p2))
 	require.Greater(t, 2.0, p1.EuclideanDistance(p3))
 
-	require.Equal(t, Point{2,1}, p2.Plus(p3))
+	require.Equal(t, Point{2, 1}, p2.Add(p3))
 }
 
 func TestPart1Example(t *testing.T) {
