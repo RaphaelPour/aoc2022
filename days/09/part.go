@@ -153,57 +153,82 @@ func (r *Rope) MoveTail(other Rope) {
 }
 
 type Chain struct {
-	ropes []Rope
+	knots []Point
+	history    Cache
 }
 
 func NewChain(count int) *Chain {
 	c := new(Chain)
-	c.ropes = make([]Rope, count)
-	for i := range c.ropes {
-		c.ropes[i] = *NewRope()
-	}
+	c.knots = make([]Point, count)
+	c.history = make(Cache)
 	return c
 }
 
 func (c *Chain) Move(direction string, steps int) {
 	// move one step at a time and propagate movement to the other ropes
 	for ; steps > 0; steps-- {
-		c.ropes[0].Move(direction, 1)
-		for i := 1; i < len(c.ropes); i++ {
-			c.ropes[i].MoveTail(c.ropes[i-1])
-		}
+		c.MoveHead(direction)
+		c.MoveTail()
 	}
 }
 
-func (c Chain) History() map[Point]bool {
-	history := make(map[Point]bool)
+func (c *Chain) MoveHead(direction string) {
+		switch direction {
+		case "R":
+			c.knots[0].x += 1
+		case "L":
+			c.knots[0].x -= 1
+		case "U":
+			c.knots[0].y -= 1
+		case "D":
+			c.knots[0].y += 1
+		}
+}
 
-	for _, tail := range c.ropes {
-		for key := range tail.history {
-			history[key] = true
+func (c *Chain) MoveTail() {
+	for i:=1;i<len(c.knots);i++ {
+		head := c.knots[i-1]
+		tail := c.knots[i]
+
+		// add current position to history if the tail is the last tail
+		if i == len(c.knots)-1 {
+			c.history.Add(tail)
+		}
+
+		if head == tail || head.EuclideanDistance(tail) < 2 {
+			continue
+		}
+
+		// move tail by minimizing its distance to head
+		newTail := tail
+		distance := 100.0
+		for y := -1; y <= 1; y++ {
+			for x := -1; x <= 1; x++ {
+				newPoint := tail.Plus(Point{x, y})
+
+				// don't cover head, head can only cover tail itself
+				if newPoint == head {
+					continue
+				}
+				newDist := newPoint.EuclideanDistance(head)
+				// fmt.Println(newPoint, r.head, newDist)
+				if newDist < distance {
+					newTail = newPoint
+					distance = newDist
+				}
+			}
+		}
+		c.knots[i] = newTail
+
+		// add new position to history if the tail is the last tail
+		if i == len(c.knots)-1 {
+			c.history.Add(newTail)
 		}
 	}
-	return history
 }
 
 func (c Chain) Count() int {
-	return len(c.History())
-}
-
-func (c Chain) Dump() {
-	hist := c.History()
-	horizont := 10
-	for y := -horizont; y < horizont; y++ {
-		for x := -horizont; x < horizont; x++ {
-			current := Point{x, y}
-			if _, ok := hist[current]; ok {
-				fmt.Print("#")
-			} else {
-				fmt.Print(".")
-			}
-		}
-		fmt.Println("")
-	}
+	return len(c.history)
 }
 
 func part1(data []string) int {
@@ -218,24 +243,22 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
-	chain := NewChain(9)
+	chain := NewChain(10)
 	for _, line := range data {
 		parts := strings.Fields(line)
 		direction := parts[0]
 		steps := s_strings.ToInt(parts[1])
 		chain.Move(direction, steps)
-		chain.Dump()
 	}
-	return chain.ropes[8].history.Count()
+	return chain.Count()
 }
 
 func main() {
-	data := input.LoadString("input1")
+	data := input.LoadString("input")
 
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(data))
 
 	fmt.Println("== [ PART 2 ] ==")
 	fmt.Println(part2(data))
-	fmt.Println("too high: 11432")
 }
