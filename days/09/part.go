@@ -49,7 +49,7 @@ func NewRope(count int) *Rope {
 	r.history = make(map[Point]bool)
 
 	// rope always starts at 0/0, add this to the history
-	r.history[Point{0,0}] = true
+	r.history[Point{0, 0}] = true
 	return r
 }
 
@@ -62,44 +62,44 @@ func (r *Rope) Move(direction string, steps int) {
 }
 
 func (r *Rope) moveHead(direction string) {
-		r.knots[0] = r.knots[0].Add(move[direction])
+	r.knots[0] = r.knots[0].Add(move[direction])
 }
 
 func (r *Rope) moveTail() {
-		for i := 1; i < len(r.knots); i++ {
-			head := r.knots[i-1]
-			tail := r.knots[i]
+	for i := 1; i < len(r.knots); i++ {
+		head := r.knots[i-1]
+		tail := r.knots[i]
 
-			if head.EuclideanDistance(tail) < 2 {
-				continue
-			}
+		if head.EuclideanDistance(tail) < 2 {
+			continue
+		}
 
-			// move tail by minimizing its distance to head
-			newTail := tail
-			distance := 100.0
-			for y := -1; y <= 1; y++ {
-				for x := -1; x <= 1; x++ {
-					newPoint := tail.Add(Point{x, y})
+		// move tail by minimizing its distance to head
+		newTail := tail
+		distance := 100.0
+		for y := -1; y <= 1; y++ {
+			for x := -1; x <= 1; x++ {
+				newPoint := tail.Add(Point{x, y})
 
-					// don't cover head, head can only cover tail itself
-					if newPoint == head {
-						continue
-					}
-					newDist := newPoint.EuclideanDistance(head)
-					// fmt.Println(newPoint, r.head, newDist)
-					if newDist < distance {
-						newTail = newPoint
-						distance = newDist
-					}
+				// don't cover head, head can only cover tail itself
+				if newPoint == head {
+					continue
+				}
+				newDist := newPoint.EuclideanDistance(head)
+				// fmt.Println(newPoint, r.head, newDist)
+				if newDist < distance {
+					newTail = newPoint
+					distance = newDist
 				}
 			}
-			r.knots[i] = newTail
-
-			// add new position to history if the tail is the last tail
-			if i == len(r.knots)-1 {
-				r.history[newTail] = true
-			}
 		}
+		r.knots[i] = newTail
+
+		// add new position to history if the tail is the last tail
+		if i == len(r.knots)-1 {
+			r.history[newTail] = true
+		}
+	}
 }
 
 func (r Rope) Count() int {
