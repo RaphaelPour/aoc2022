@@ -86,7 +86,22 @@ func (m Monkey) Test(worryLevel int) int {
 	return m.ifFalseTarget
 }
 
-type Monkeys []*Monkey
+type Monkeys struct {
+	bullies []*Monkey
+	modues  int
+}
+
+func NewMonkeys() *Monkeys {
+	m := new(Monkeys)
+	m.bullies = make([]*Monkey, 0)
+	m.modues = 1
+	return m
+}
+
+func (m *Monkeys) Add(monkey *Monkey) {
+	m.bullies = append(m.bullies, monkey)
+	m.modues *= monkey.divisibleBy
+}
 
 func (m Monkeys) Round() {
 	for _, monkey := range m {
@@ -119,11 +134,10 @@ func (m Monkeys) Round() {
 func part1(data []string) int {
 	re := regexp.MustCompile(`^Monkey.*Starting items:([\s\d,]+).*new = old (.*).*Test: divisible by (\d+) .*monkey (\d+).*monkey (\d+)`)
 
-	monkeys := make(Monkeys, 0)
+	monkeys := NewMonkeys()
 	for _, rawLine := range data {
 		line := strings.ReplaceAll(rawLine, "\n", " ")
 		match := re.FindStringSubmatch(line)
-		// fmt.Printf("%#v\n\n", match)
 
 		monkey := NewMonkey(true)
 		rawItems := strings.Split(match[1], ",")
@@ -136,9 +150,7 @@ func part1(data []string) int {
 		monkey.ifTrueTarget = s_strings.ToInt(match[4])
 		monkey.ifFalseTarget = s_strings.ToInt(match[5])
 
-		modus *= monkey.divisibleBy
-
-		monkeys = append(monkeys, monkey)
+		monkeys.Add(monkey)
 	}
 
 	for round := 1; round <= 20; round++ {
@@ -154,6 +166,7 @@ func part1(data []string) int {
 	return m_math.Product(m_math.MaxN(inspections, 2))
 }
 
+/*
 func part2(data []string) int {
 	re := regexp.MustCompile(`^Monkey.*Starting items:([\s\d,]+).*new = old (.*).*Test: divisible by (\d+) .*monkey (\d+).*monkey (\d+)`)
 
@@ -189,6 +202,7 @@ func part2(data []string) int {
 
 	return m_math.Product(m_math.MaxN(inspections, 2))
 }
+*/
 
 func LoadStringWithDelimiter(filename, delimiter string) []string {
 	data, err := os.ReadFile(filename)
@@ -205,6 +219,8 @@ func main() {
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(data))
 
-	fmt.Println("== [ PART 2 ] ==")
-	fmt.Println(part2(data))
+	/*
+			 * fmt.Println("== [ PART 2 ] ==")
+		     * fmt.Println(part2(data))
+	*/
 }
