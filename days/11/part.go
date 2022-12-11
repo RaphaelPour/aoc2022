@@ -10,6 +10,10 @@ import (
 	s_strings "github.com/RaphaelPour/stellar/strings"
 )
 
+var (
+	modus = 1
+)
+
 type Operation struct {
 	raw      string
 	operator func(int, int) int
@@ -62,12 +66,14 @@ type Monkey struct {
 	ifTrueTarget  int
 	ifFalseTarget int
 
-	inspected int
+	autoWorryRelief bool
+	inspected       int
 }
 
-func NewMonkey() *Monkey {
+func NewMonkey(autoWorryRelief bool) *Monkey {
 	m := new(Monkey)
 	m.items = make([]int, 0)
+	m.autoWorryRelief = autoWorryRelief
 	return m
 }
 
@@ -83,17 +89,19 @@ func (m Monkey) Test(worryLevel int) int {
 type Monkeys []*Monkey
 
 func (m Monkeys) Round() {
-	for i, monkey := range m {
-		fmt.Printf("Monkey %d:\n", i)
+	for _, monkey := range m {
+		// fmt.Printf("Monkey %d:\n", i)
 		for _, item := range monkey.items {
 			// fmt.Printf("\tMonkey inspects an item withj a worry level of %d.\n", item)
 
 			// monkey inspects item -> operation gets applied
 			// fmt.Printf("\t\tWorry level = worry level %s\n", monkey.operation.raw)
-			item = monkey.operation.Compute(item)
+			item = monkey.operation.Compute(item) % modus
 
 			// monkey gets bored -> divide item by 3
-			item /= 3
+			if monkey.autoWorryRelief {
+				item /= 3
+			}
 			// fmt.Printf("\t\tMonkey gets bored: Worry level is divided by 3 to %d.\n", item)
 
 			// test item -> throw it to the resulting monkey
@@ -101,7 +109,6 @@ func (m Monkeys) Round() {
 			// fmt.Printf("\t\tItem with worry level %d is thrown to monkey %d.\n", item, target)
 			m[target].items = append(m[target].items, item)
 			monkey.inspected += 1
-			fmt.Println("monkey", i, "inspected", monkey.inspected)
 		}
 
 		// monkey has thrown all items away
@@ -113,12 +120,12 @@ func part1(data []string) int {
 	re := regexp.MustCompile(`^Monkey.*Starting items:([\s\d,]+).*new = old (.*).*Test: divisible by (\d+) .*monkey (\d+).*monkey (\d+)`)
 
 	monkeys := make(Monkeys, 0)
-	for _, line := range data {
-		line = strings.ReplaceAll(line, "\n", " ")
+	for _, rawLine := range data {
+		line := strings.ReplaceAll(rawLine, "\n", " ")
 		match := re.FindStringSubmatch(line)
 		// fmt.Printf("%#v\n\n", match)
 
-		monkey := NewMonkey()
+		monkey := NewMonkey(true)
 		rawItems := strings.Split(match[1], ",")
 		for _, item := range rawItems {
 			monkey.items = append(monkey.items, s_strings.ToInt(strings.TrimSpace(item)))
@@ -129,12 +136,13 @@ func part1(data []string) int {
 		monkey.ifTrueTarget = s_strings.ToInt(match[4])
 		monkey.ifFalseTarget = s_strings.ToInt(match[5])
 
-		fmt.Printf("%#v\n", monkey)
+		modus *= monkey.divisibleBy
+
 		monkeys = append(monkeys, monkey)
 	}
 
 	for round := 1; round <= 20; round++ {
-		fmt.Println("round:", round)
+		// fmt.Println("round:", round)
 		monkeys.Round()
 	}
 
@@ -147,7 +155,39 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
-	return 0
+	re := regexp.MustCompile(`^Monkey.*Starting items:([\s\d,]+).*new = old (.*).*Test: divisible by (\d+) .*monkey (\d+).*monkey (\d+)`)
+
+	monkeys := make(Monkeys, 0)
+	for _, rawLine := range data {
+		line := strings.ReplaceAll(rawLine, "\n", " ")
+		match := re.FindStringSubmatch(line)
+		// fmt.Printf("%#v\n\n", match)
+
+		monkey := NewMonkey(false)
+		rawItems := strings.Split(match[1], ",")
+		for _, item := range rawItems {
+			monkey.items = append(monkey.items, s_strings.ToInt(strings.TrimSpace(item)))
+		}
+
+		monkey.operation = NewOperation(match[2])
+		monkey.divisibleBy = s_strings.ToInt(match[3])
+		monkey.ifTrueTarget = s_strings.ToInt(match[4])
+		monkey.ifFalseTarget = s_strings.ToInt(match[5])
+
+		monkeys = append(monkeys, monkey)
+	}
+
+	for round := 1; round <= 10000; round++ {
+		// fmt.Println("round:", round)
+		monkeys.Round()
+	}
+
+	inspections := make([]int, len(monkeys))
+	for i, monkey := range monkeys {
+		inspections[i] = monkey.inspected
+	}
+
+	return m_math.Product(m_math.MaxN(inspections, 2))
 }
 
 func LoadStringWithDelimiter(filename, delimiter string) []string {
@@ -165,6 +205,6 @@ func main() {
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(data))
 
-	// fmt.Println("== [ PART 2 ] ==")
-	// fmt.Println(part2(data))
+	fmt.Println("== [ PART 2 ] ==")
+	fmt.Println(part2(data))
 }
