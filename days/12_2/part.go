@@ -6,6 +6,11 @@ import (
 	"github.com/RaphaelPour/stellar/input"
 )
 
+type Field struct  {
+	p Point
+	dist int
+}
+
 type Point struct {
 	x,y int
 }
@@ -71,29 +76,32 @@ func part1(data []string) int  {
 
 	// breadth first search
 	path := make(map[Point]bool)
-	queue := make([]Point,0)
-	queue = append(queue, h.start)
+	queue := make([]Field,0)
+	queue = append(queue, Field{h.start,0})
+	i := 0
 	for len(queue) > 0 {
+		fmt.Println(i, len(queue), len(path))
+		i++
 		current := queue[0]
 		queue = queue[1:]
-		if current == h.goal {
+		if current.p == h.goal {
 			fmt.Println("GOAL")
-			path[current] = true
+			path[current.p] = true
 			Dump(path)
-			return len(path)
+			return current.dist
 		}
 
 		for _, neighbor := range []Point{
-			current.Add(Point{-1,0}),
-			current.Add(Point{1,0}),
-			current.Add(Point{0,-1}),
-			current.Add(Point{0,1}),
+			current.p.Add(Point{-1,0}),
+			current.p.Add(Point{1,0}),
+			current.p.Add(Point{0,-1}),
+			current.p.Add(Point{0,1}),
 		}{
 			if h.IsOutOfBounds(neighbor) {
 				continue
 			}
 			
-			if h.Get(neighbor) - h.Get(current) > 1 {
+			if h.Get(neighbor) - h.Get(current.p) > 1 {
 				continue
 			}
 
@@ -101,14 +109,14 @@ func part1(data []string) int  {
 				continue
 			}
 
-			path[current] = true
-			queue = append(queue, neighbor)
+			path[neighbor] = true
+			queue = append(queue, Field{neighbor, current.dist+1})
 		}
 	}
 	return 0
 }
 
 func main() {
-	data := input.LoadString("input1")
+	data := input.LoadString("input")
 	fmt.Println(part1(data))
 }
