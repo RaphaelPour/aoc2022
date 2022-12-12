@@ -53,41 +53,17 @@ func Dump(path map[Point]bool) {
 	}
 }
 
-func part1(data []string) int  {
-	h := NewHeightMap(len(data))
-
-	// parse input
-	for y, line := range data {
-		h.grid[y] = make([]int, len(line))
-		for x, field := range line {
-			height := int(field - 'a')
-			if field == 'S' {
-				height = 0
-				h.start = Point{x,y}
-			} else if field == 'E' {
-				height = int('z' - 'a')
-				h.goal = Point{x,y}
-			}
-			h.grid[y][x] = height
-			fmt.Printf("%2d",height)
-		}
-		fmt.Println("")
-	}
-
-	// breadth first search
+func (h HeightMap) search(start Point) int {
 	path := make(map[Point]bool)
 	queue := make([]Field,0)
-	queue = append(queue, Field{h.start,0})
+	queue = append(queue, Field{start,0})
 	i := 0
 	for len(queue) > 0 {
-		fmt.Println(i, len(queue), len(path))
 		i++
 		current := queue[0]
 		queue = queue[1:]
 		if current.p == h.goal {
-			fmt.Println("GOAL")
 			path[current.p] = true
-			Dump(path)
 			return current.dist
 		}
 
@@ -113,10 +89,70 @@ func part1(data []string) int  {
 			queue = append(queue, Field{neighbor, current.dist+1})
 		}
 	}
+
 	return 0
+}
+
+func part1(data []string) int  {
+	h := NewHeightMap(len(data))
+
+	// parse input
+	for y, line := range data {
+		h.grid[y] = make([]int, len(line))
+		for x, field := range line {
+			height := int(field - 'a')
+			if field == 'S' {
+				height = 0
+				h.start = Point{x,y}
+			} else if field == 'E' {
+				height = int('z' - 'a')
+				h.goal = Point{x,y}
+			}
+			h.grid[y][x] = height
+		}
+	}
+
+	return h.search(h.start)
+}
+
+func part2(data []string) int {
+	h := NewHeightMap(len(data))
+
+	// parse input
+	starts := make([]Point,0)
+	for y, line := range data {
+		h.grid[y] = make([]int, len(line))
+		for x, field := range line {
+			height := int(field - 'a')
+			if field == 'S' {
+				height = 0
+				h.start = Point{x,y}
+			} else if field == 'E' {
+				height = int('z' - 'a')
+				h.goal = Point{x,y}
+			}
+			if height == 0{
+				starts = append(starts, Point{x,y})
+			}
+			h.grid[y][x] = height
+		}
+	}
+
+	minSteps := -1
+	for _, start := range starts {
+		steps := h.search(start)
+		if steps > 0 && (minSteps == -1 || steps < minSteps) {
+			minSteps = steps
+		}
+	}
+	return minSteps
 }
 
 func main() {
 	data := input.LoadString("input")
+	fmt.Println("== Part 1 ==")
 	fmt.Println(part1(data))
+
+	fmt.Println("== Part 2 ==")
+	fmt.Println(part2(data))
 }
