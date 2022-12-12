@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"github.com/RaphaelPour/stellar/input"
+	"github.com/RaphaelPour/stellar/queue"
 )
 
-type Field struct  {
-	p Point
+type Field struct {
+	p    Point
 	dist int
 }
 
 type Point struct {
-	x,y int
+	x, y int
 }
 
 func (p Point) Add(other Point) Point {
@@ -22,7 +23,7 @@ func (p Point) Add(other Point) Point {
 }
 
 type HeightMap struct {
-	grid [][]int
+	grid        [][]int
 	start, goal Point
 }
 
@@ -41,9 +42,9 @@ func (h HeightMap) IsOutOfBounds(p Point) bool {
 }
 
 func Dump(path map[Point]bool) {
-	for y := 0;y<5;y++ {
-		for x := 0 ;x<8;x++ {
-			if _, ok := path[Point{x,y,}]; ok {
+	for y := 0; y < 5; y++ {
+		for x := 0; x < 8; x++ {
+			if _, ok := path[Point{x, y}]; ok {
 				fmt.Print("X")
 			} else {
 				fmt.Print(".")
@@ -55,29 +56,28 @@ func Dump(path map[Point]bool) {
 
 func (h HeightMap) search(start Point) int {
 	path := make(map[Point]bool)
-	queue := make([]Field,0)
-	queue = append(queue, Field{start,0})
+	queue := queue.NewQueue[Field]()
+	queue.Enqueue(Field{start, 0})
 	i := 0
 	for len(queue) > 0 {
 		i++
-		current := queue[0]
-		queue = queue[1:]
+		current := queue.Dequeue()
 		if current.p == h.goal {
 			path[current.p] = true
 			return current.dist
 		}
 
 		for _, neighbor := range []Point{
-			current.p.Add(Point{-1,0}),
-			current.p.Add(Point{1,0}),
-			current.p.Add(Point{0,-1}),
-			current.p.Add(Point{0,1}),
-		}{
+			current.p.Add(Point{-1, 0}),
+			current.p.Add(Point{1, 0}),
+			current.p.Add(Point{0, -1}),
+			current.p.Add(Point{0, 1}),
+		} {
 			if h.IsOutOfBounds(neighbor) {
 				continue
 			}
-			
-			if h.Get(neighbor) - h.Get(current.p) > 1 {
+
+			if h.Get(neighbor)-h.Get(current.p) > 1 {
 				continue
 			}
 
@@ -86,14 +86,14 @@ func (h HeightMap) search(start Point) int {
 			}
 
 			path[neighbor] = true
-			queue = append(queue, Field{neighbor, current.dist+1})
+			queue.Enqueue(Field{neighbor, current.dist + 1})
 		}
 	}
 
 	return 0
 }
 
-func part1(data []string) int  {
+func part1(data []string) int {
 	h := NewHeightMap(len(data))
 
 	// parse input
@@ -103,10 +103,10 @@ func part1(data []string) int  {
 			height := int(field - 'a')
 			if field == 'S' {
 				height = 0
-				h.start = Point{x,y}
+				h.start = Point{x, y}
 			} else if field == 'E' {
 				height = int('z' - 'a')
-				h.goal = Point{x,y}
+				h.goal = Point{x, y}
 			}
 			h.grid[y][x] = height
 		}
@@ -119,20 +119,20 @@ func part2(data []string) int {
 	h := NewHeightMap(len(data))
 
 	// parse input
-	starts := make([]Point,0)
+	starts := make([]Point, 0)
 	for y, line := range data {
 		h.grid[y] = make([]int, len(line))
 		for x, field := range line {
 			height := int(field - 'a')
 			if field == 'S' {
 				height = 0
-				h.start = Point{x,y}
+				h.start = Point{x, y}
 			} else if field == 'E' {
 				height = int('z' - 'a')
-				h.goal = Point{x,y}
+				h.goal = Point{x, y}
 			}
-			if height == 0{
-				starts = append(starts, Point{x,y})
+			if height == 0 {
+				starts = append(starts, Point{x, y})
 			}
 			h.grid[y][x] = height
 		}
