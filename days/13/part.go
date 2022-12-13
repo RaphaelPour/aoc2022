@@ -8,44 +8,60 @@ import (
 	"github.com/RaphaelPour/stellar/input"
 )
 
+const (
+	CONTINUE = iota
+	BAD
+	GOOD
+)
+
 type PacketPair struct {
 	left, right string
 }
 
-func Valid(left, right string) bool {
+func Valid(left, right string) int {
 	fmt.Println("Compare", left, "vs", right)
 	/* 1. check if both are integers */
 	leftVal, err1 := strconv.Atoi(left)
 	rightVal, err2 := strconv.Atoi(right)
-
+ 
 	if err1 == nil && err2 == nil {
-		return leftVal <= rightVal
+		fmt.Println("both numbers")
+		if leftVal < rightVal {
+				return GOOD
+		} else if rightVal > leftVal {
+			return BAD
+		}
+		return CONTINUE
 	}
 
 	/* 2. both are lists */
 	if err1 != nil && err2 != nil {
+		fmt.Println("both lists")
 		leftList := strings.Split(left[1:len(left)-1], ",")
 		rightList := strings.Split(right[1:len(right)-1], ",")
 
-		fmt.Println(rightList)
-		fmt.Println(leftList)
+		fmt.Printf("%#v\n", rightList)
+		fmt.Printf("%#v\n",leftList)
 		// return false
 
 		/* right list shouldn't have less than the left one */
 		if len(rightList) < len(leftList) {
-			return true
+			return BAD
 		}
 
-		if len(leftList) < len(rightList) {
-			/* compare pair-wise */
-			for i := range leftList {
-				if !Valid(leftList[i], rightList[i]) {
-					return false
-				}
+		/* compare pair-wise */
+		for i := range leftList {
+			if Valid(leftList[i], rightList[i]) == BAD{
+				return BAD
 			}
-			return true
 		}
+		if len(rightList) > len(leftList) {
+			return GOOD
+		}
+		return CONTINUE
 	}
+
+	fmt.Println("mixed")
 
 	/* 3. one of both is an integer */
 	if err1 != nil {
@@ -67,7 +83,7 @@ func part1(data []string) int {
 			packets[len(packets)-1].right = line
 		} else {
 			p := packets[len(packets)-1]
-			if Valid(p.left, p.right) {
+			if Valid(p.left, p.right) == GOOD {
 				sum += len(packets) - 1
 			}
 			return 0
