@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"encoding/json"
+	"sort"
 
 	"github.com/RaphaelPour/stellar/input"
 )
@@ -90,7 +91,36 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
-	return 0
+	packets := make([]any, 0)
+	data = append(data,"[[2]]", "[[6]]")
+	for _, line := range data {
+		if line == ""{
+			continue
+		}
+
+		var packet []any
+		if err := json.Unmarshal([]byte(line), &packet); err != nil {
+			panic(fmt.Sprintf("error parsing %s: %s", line, err))
+		}
+		packets = append(packets, packet)
+	}
+
+	divider1 := fmt.Sprintf("%#v",packets[len(packets)-1])
+	divider2 := fmt.Sprintf("%#v",packets[len(packets)-2])
+
+	sort.Slice(packets,func(i,j int)bool{
+		return Valid(packets[i], packets[j]) == GOOD
+	})
+
+	sum := 1
+	for i, packet := range packets{
+		s := fmt.Sprintf("%#v", packet)
+		if s == divider1 || s == divider2{
+			sum *= (i+1)
+		}
+	}
+
+	return sum
 }
 
 func main() {
@@ -98,4 +128,10 @@ func main() {
 
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(data))
+
+	fmt.Println("== [ PART 2 ] ==")
+	fmt.Println(part2(data))
+
+	fmt.Println("too low: 16263")
+	fmt.Println("too high: 30504")
 }
