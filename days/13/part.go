@@ -19,7 +19,7 @@ type PacketPair struct {
 }
 
 func Valid(left, right string) int {
-	fmt.Println("Compare", left, "vs", right)
+	fmt.Println("\nCompare", left, "vs", right)
 	/* 1. check if both are integers */
 	leftVal, err1 := strconv.Atoi(left)
 	rightVal, err2 := strconv.Atoi(right)
@@ -27,10 +27,13 @@ func Valid(left, right string) int {
 	if err1 == nil && err2 == nil {
 		fmt.Println("both numbers")
 		if leftVal < rightVal {
+				fmt.Println("good")
 				return GOOD
-		} else if rightVal > leftVal {
+		} else if rightVal < leftVal {
+				fmt.Println("bad")
 			return BAD
 		}
+		fmt.Println("continue")
 		return CONTINUE
 	}
 
@@ -40,29 +43,35 @@ func Valid(left, right string) int {
 		leftList := strings.Split(left[1:len(left)-1], ",")
 		rightList := strings.Split(right[1:len(right)-1], ",")
 
-		fmt.Printf("%#v\n", rightList)
-		fmt.Printf("%#v\n",leftList)
+		fmt.Printf("%s -> %#v\n",left, leftList)
+		fmt.Printf("%s -> %#v\n",right,  rightList)
 		// return false
-
-		/* right list shouldn't have less than the left one */
-		if len(rightList) < len(leftList) {
-			return BAD
-		}
 
 		/* compare pair-wise */
 		for i := range leftList {
-			if Valid(leftList[i], rightList[i]) == BAD{
-				return BAD
+			if result := Valid(leftList[i], rightList[i]); result != CONTINUE {
+				fmt.Println("compare",result)
+				return result
 			}
 		}
+		
 		if len(rightList) > len(leftList) {
+			fmt.Println("good")
 			return GOOD
 		}
+		
+		/* right list shouldn't have less than the left one */
+		if len(rightList) < len(leftList) {
+				fmt.Println("bad")
+			return BAD
+		}
+
+		fmt.Println("continue")
 		return CONTINUE
 	}
 
 	fmt.Println("mixed")
-
+	return BAD
 	/* 3. one of both is an integer */
 	if err1 != nil {
 		left = fmt.Sprintf("[%s]", left)
@@ -83,10 +92,14 @@ func part1(data []string) int {
 			packets[len(packets)-1].right = line
 		} else {
 			p := packets[len(packets)-1]
-			if Valid(p.left, p.right) == GOOD {
-				sum += len(packets) - 1
+			result := Valid(p.left, p.right)
+			if result == GOOD {
+				sum += len(packets) - 1 + 1
 			}
-			return 0
+		}
+
+		if i == 5 {
+			return sum
 		}
 	}
 
