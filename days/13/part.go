@@ -2,84 +2,64 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
+	"encoding/json"
+	"sort"
 
 	"github.com/RaphaelPour/stellar/input"
 )
 
 const (
 	CONTINUE = iota
-	BAD
 	GOOD
+	BAD
 )
 
 type PacketPair struct {
-	left, right string
+	left, right any
 }
 
-func Valid(left, right string) int {
-	fmt.Println("\nCompare", left, "vs", right)
-	/* 1. check if both are integers */
-	leftVal, err1 := strconv.Atoi(left)
-	rightVal, err2 := strconv.Atoi(right)
- 
-	if err1 == nil && err2 == nil {
-		fmt.Println("both numbers")
+func Valid(left, right any) int {
+	leftVal, leftValOk := left.(float64)
+	rightVal, rightValOk := right.(float64)
+	leftList, leftListOk := left.([]any)
+	rightList, rightListOk := right.([]any)
+
+	/* 1. both are numbers */
+	if leftValOk && rightValOk {
 		if leftVal < rightVal {
-				fmt.Println("good")
-				return GOOD
-		} else if rightVal < leftVal {
-				fmt.Println("bad")
+			return GOOD
+		} else if leftVal > rightVal {
 			return BAD
 		}
-		fmt.Println("continue")
 		return CONTINUE
 	}
 
 	/* 2. both are lists */
-	if err1 != nil && err2 != nil {
-		fmt.Println("both lists")
-		leftList := strings.Split(left[1:len(left)-1], ",")
-		rightList := strings.Split(right[1:len(right)-1], ",")
-
-		fmt.Printf("%s -> %#v\n",left, leftList)
-		fmt.Printf("%s -> %#v\n",right,  rightList)
-		// return false
-
-		/* compare pair-wise */
-		for i := range leftList {
+	if leftListOk && rightListOk {
+		for i := 0; i < len(leftList) && i < len(rightList); i++ {
 			if result := Valid(leftList[i], rightList[i]); result != CONTINUE {
-				fmt.Println("compare",result)
 				return result
 			}
 		}
-		
-		if len(rightList) > len(leftList) {
-			fmt.Println("good")
+
+		if len(leftList) < len(rightList) {
 			return GOOD
-		}
-		
-		/* right list shouldn't have less than the left one */
-		if len(rightList) < len(leftList) {
-				fmt.Println("bad")
+		} else if len(leftList) > len(rightList) {
 			return BAD
 		}
 
-		fmt.Println("continue")
 		return CONTINUE
 	}
 
-	fmt.Println("mixed")
-	return BAD
-	/* 3. one of both is an integer */
-	if err1 != nil {
-		left = fmt.Sprintf("[%s]", left)
+	/* 3. one is a number and the other a list */
+	if leftValOk && rightListOk {
+		return Valid([]any{leftVal}, rightList)
+	} else if leftListOk && rightValOk {
+		return Valid(leftList, []any{rightVal})
 	}
-	if err2 != nil {
-		right = fmt.Sprintf("[%s]", right)
-	}
-	return Valid(left, right)
+
+	/* else: something went wrong */
+	panic(fmt.Sprintf("error asserting '%s' or '%s': expected number or list", left, right))
 }
 
 func part1(data []string) int {
@@ -87,19 +67,23 @@ func part1(data []string) int {
 	sum := 0
 	for i, line := range data {
 		if i%3 == 0 {
-			packets = append(packets, PacketPair{left: line})
-		} else if i%3 == 1 {
-			packets[len(packets)-1].right = line
-		} else {
-			p := packets[len(packets)-1]
-			result := Valid(p.left, p.right)
-			if result == GOOD {
-				sum += len(packets) - 1 + 1
+			var left []any
+			if err := json.Unmarshal([]byte(line), &left); err != nil {
+				panic(fmt.Sprintf("error parsing %s: %s", line, err))
 			}
+			packets = append(packets, PacketPair{left: left})
+		} else if i%3 == 1 {
+			var right []any
+			if err := json.Unmarshal([]byte(line), &right); err != nil {
+				panic(fmt.Sprintf("error parsing %s: %s", line, err))
+			}
+			packets[len(packets)-1].right = right
 		}
+	}
 
-		if i == 5 {
-			return sum
+	for i, packet := range packets {
+		if Valid(packet.left, packet.right) == GOOD{
+			sum += i + 1
 		}
 	}
 
@@ -107,12 +91,44 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
-	return 0
+	packets := make([]any, 0)
+	data = append(data,"[[2]]", "[[6]]")
+	for _, line := range data {
+		if line == ""{
+			continue
+		}
+
+		var packet []any
+		if err := json.Unmarshal([]byte(line), &packet); err != nil {
+			panic(fmt.Sprintf("error parsing %s: %s", line, err))
+		}
+		packets = append(packets, packet)
+	}
+
+	divider1 := fmt.Sprintf("%#v",packets[len(packets)-1])
+	divider2 := fmt.Sprintf("%#v",packets[len(packets)-2])
+
+	sort.Slice(packets,func(i,j int)bool{
+		return Valid(packets[i], packets[j]) == GOOD
+	})
+
+	sum := 1
+	for i, packet := range packets{
+		s := fmt.Sprintf("%#v", packet)
+		if s == divider1 || s == divider2{
+			sum *= (i+1)
+		}
+	}
+
+	return sum
 }
 
 func main() {
-	data := input.LoadString("input1")
+	data := input.LoadString("input")
 
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(data))
+
+	fmt.Println("== [ PART 2 ] ==")
+	fmt.Println(part2(data))
 }
