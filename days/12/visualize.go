@@ -13,8 +13,8 @@ import (
 	"github.com/RaphaelPour/stellar/input"
 	"github.com/deadsy/sdfx/render"
 	"github.com/deadsy/sdfx/sdf"
-	"github.com/deadsy/sdfx/vec/v2"
-	"github.com/deadsy/sdfx/vec/v3"
+	v2 "github.com/deadsy/sdfx/vec/v2"
+	v3 "github.com/deadsy/sdfx/vec/v3"
 )
 
 var (
@@ -24,14 +24,16 @@ var (
 )
 
 func renderSTL(input []string) {
-	filename := "day09.stl"
+	fmt.Println("width:", len(input[0]))
+	fmt.Println("height:", len(input))
+	filename := "day12.stl"
 	boxes := make([]sdf.SDF3, 0)
 
-	plate2d := sdf.Box2D(v2.Vec{float64(len(input)), float64(len(input[0]))}, 1)
+	plate2d := sdf.Box2D(v2.Vec{float64(len(input[0])), float64(len(input))}, 1)
 	plate3d := sdf.Extrude3D(plate2d, 2.0)
 	plateM := sdf.Translate3d(v3.Vec{
-		float64(len(input)) / 2,
 		float64(len(input[0])) / 2,
+		float64(len(input)) / 2,
 		0,
 	})
 
@@ -42,7 +44,7 @@ func renderSTL(input []string) {
 			if cell == 0 {
 				continue
 			}
-			
+
 			box2d := sdf.Box2D(v2.Vec{1, 1}, 0)
 			// add one so level 0 has one unit
 			height := float64(cell + 1)
@@ -55,11 +57,13 @@ func renderSTL(input []string) {
 
 	fmt.Printf("generated %d boxes\n", len(boxes))
 	start := time.Now()
-	render.ToSTL(sdf.Union3D(boxes...), filename, render.NewMarchingCubesOctree(10))
+	render.ToSTL(sdf.Union3D(boxes...), filename, render.NewMarchingCubesOctree(40))
 	fmt.Printf("needed %s\n", time.Since(start))
 }
 
 func renderHeightMap(input []string) {
+	fmt.Println("width:", len(input[0]))
+	fmt.Println("height:", len(input))
 	image := image.NewNRGBA(image.Rect(0, 0, len(input[0]), len(input)))
 	for y, row := range input {
 		for x, rawCell := range row {
@@ -73,7 +77,7 @@ func renderHeightMap(input []string) {
 		}
 	}
 
-	filename := fmt.Sprintf("day13_%d.png", time.Now().Unix())
+	filename := fmt.Sprintf("day12_%d.png", time.Now().Unix())
 	f, err := os.Create(filename)
 	if err != nil {
 		log.Fatal(err)
