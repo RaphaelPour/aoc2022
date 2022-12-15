@@ -3,7 +3,7 @@ module github.com/RaphaelPour/aoc2022
 go 1.19
 
 require (
-	github.com/RaphaelPour/stellar v0.0.0-20221212150457-de63f1ea73bc
+	github.com/RaphaelPour/stellar v0.0.0-20221215052053-c272527ed746
 	github.com/stretchr/testify v1.8.1
 )
 
