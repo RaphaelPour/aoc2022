@@ -39,16 +39,17 @@ func part1(data []string) int {
 	re := regexp.MustCompile(`x=([-\d]+), y=([-\d]+).*x=([-\d]+), y=([-\d]+)`)
 
 	m := make(map[int]struct{})
-	for i, line := range data {
+	for _, line := range data {
 		match := re.FindStringSubmatch(line)
-		fmt.Println(i, match)
-		sx := s_strings.ToInt(match[1])
-		sy := s_strings.ToInt(match[2])
-		bx := s_strings.ToInt(match[3])
-		by := s_strings.ToInt(match[4])
 
-		sensor := math.Point[int]{sx, sy}
-		beacon := math.Point[int]{bx, by}
+		sensor := math.Point[int]{
+			s_strings.ToInt(match[1]),
+			s_strings.ToInt(match[2]),
+		}
+		beacon := math.Point[int]{
+			s_strings.ToInt(match[3]),
+			s_strings.ToInt(match[4]),
+		}
 
 		dist := Dist(sensor, beacon)
 		baseline := math.Point[int]{sensor.X, 2000000}
@@ -67,16 +68,65 @@ func part1(data []string) int {
 }
 
 func part2(data []string) int {
-	return 0
+	re := regexp.MustCompile(`x=([-\d]+), y=([-\d]+).*x=([-\d]+), y=([-\d]+)`)
+
+	m := make([][]bool, 20)
+	for y := range m {
+		m[y] = make([]bool, 20)
+	}
+	for _, line := range data {
+		match := re.FindStringSubmatch(line)
+
+		sensor := math.Point[int]{
+			s_strings.ToInt(match[1]),
+			s_strings.ToInt(match[2]),
+		}
+		beacon := math.Point[int]{
+			s_strings.ToInt(match[3]),
+			s_strings.ToInt(match[4]),
+		}
+
+		dist := Dist(sensor, beacon)
+
+		for y := -dist; y <= dist; y++ {
+			for x := -dist; x <= dist; x++ {
+				newP := sensor.Add(math.Point[int]{x, y})
+				if newP.Y < 0 || newP.Y >= len(m) {
+					continue
+				}
+				if newP.X < 0 || newP.X >= len(m[newP.Y]) {
+					continue
+				}
+
+				if Dist(newP, sensor) <= dist { // && newP != beacon{
+					m[newP.Y][newP.X] = true
+				}
+			}
+		}
+	}
+
+	result := 0
+	for y, row := range m{
+		for x, cell := range row{
+			if !cell {
+				fmt.Print(".")
+				result = x*4000000 + y
+			} else {
+				fmt.Print("#")
+			}
+		}
+		fmt.Println("")
+	}
+
+	return result
 }
 
 func main() {
 	data := input.LoadString("input")
 
-	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println(part1(data))
-	fmt.Println("too low: 5508233")
+	// fmt.Println("== [ PART 1 ] ==")
+	// fmt.Println(part1(data))
 
-	// fmt.Println("== [ PART 2 ] ==")
-	// fmt.Println(part2(data))
+	fmt.Println("== [ PART 2 ] ==")
+	fmt.Println(part2(data))
 }
