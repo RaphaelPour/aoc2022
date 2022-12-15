@@ -70,11 +70,9 @@ func part1(data []string) int {
 func part2(data []string) int {
 	re := regexp.MustCompile(`x=([-\d]+), y=([-\d]+).*x=([-\d]+), y=([-\d]+)`)
 
-	m := make([][]bool, 20)
-	for y := range m {
-		m[y] = make([]bool, 20)
-	}
+	m := make(map[math.Point[int]]struct{})
 	for _, line := range data {
+		fmt.Println(line)
 		match := re.FindStringSubmatch(line)
 
 		sensor := math.Point[int]{
@@ -86,43 +84,36 @@ func part2(data []string) int {
 			s_strings.ToInt(match[4]),
 		}
 
-		dist := Dist(sensor, beacon)
+		dist := Dist(sensor, beacon)+1
 
-		for y := -dist; y <= dist; y++ {
+		for y := -dist; y <= dist; y++{
 			for x := -dist; x <= dist; x++ {
 				newP := sensor.Add(math.Point[int]{x, y})
-				if newP.Y < 0 || newP.Y >= len(m) {
-					continue
-				}
-				if newP.X < 0 || newP.X >= len(m[newP.Y]) {
-					continue
-				}
 
-				if Dist(newP, sensor) <= dist { // && newP != beacon{
-					m[newP.Y][newP.X] = true
+				d := Dist(newP, sensor)
+				if _, ok := m[newP]; ok  && d < dist {
+					delete(m, newP)
+				} else if d == dist { // && newP != beacon{
+					m[newP] = struct{}{}
 				}
 			}
 		}
 	}
 
-	result := 0
-	for y, row := range m{
-		for x, cell := range row{
-			if !cell {
-				fmt.Print(".")
-				result = x*4000000 + y
-			} else {
-				fmt.Print("#")
-			}
-		}
-		fmt.Println("")
+	if len(m) != 1 {
+		panic(fmt.Sprintf("expected map to have one element, got %d", len(m)))
 	}
 
-	return result
+	for key := range m {
+		return key.X * 4000000 + key.Y
+	}
+
+	// unreachable code
+	return 0
 }
 
 func main() {
-	data := input.LoadString("input")
+	data := input.LoadString("input1")
 
 	// fmt.Println("== [ PART 1 ] ==")
 	// fmt.Println(part1(data))
