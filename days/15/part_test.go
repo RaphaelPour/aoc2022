@@ -1,11 +1,11 @@
 package main
 
 import (
-    "testing"
+	"testing"
 
-        "github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExample(t *testing.T) {
-    // require.Equal(t, 0, part1([]string{})
+	// require.Equal(t, 0, part1([]string{})
 }
