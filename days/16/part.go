@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
-	"sort"
 
 	"github.com/RaphaelPour/stellar/input"
 	s_strings "github.com/RaphaelPour/stellar/strings"
@@ -16,24 +15,19 @@ type Valve struct {
 	neighbors []string
 }
 
-type CacheObject struct {
-	pressure  int
-	timeLeft int
-	path     string
+type CacheKey struct{
+	start *Valve
 	open string
+}
+type CacheValue struct{
+	pressure int
+	path string
 }
 
 type Problem struct {
 	valvesWithFlow int
 	valves         map[string]Valve
-	cache          map[string][]CacheObject
-}
-
-
-func CheckAlreadyOpen(open1,open2 string) bool {
-	open := strings.Split(strings.TrimSpace(open1)," ")
-	sort.Strings(open)
-	return strings.Join(open," ") == open2
+	cache          map[CacheKey]CacheValue
 }
 
 func (p *Problem) Find(start Valve, minutesLeft int, releasedPressure int, open string) (int, string) {
@@ -57,41 +51,19 @@ func (p *Problem) Find(start Valve, minutesLeft int, releasedPressure int, open 
 	max := 0
 	currentPath := ""
 	for _, neighbor := range start.neighbors {
-		if objects, ok := p.cache[neighbor]; ok {
-			found := false
-			for _, obj := range objects {
-				if CheckAlreadyOpen(open, obj.open) && obj.timeLeft < minutesLeft || obj.pressure <= max {
-					continue
-				}
-
-				max = obj.pressure
-				currentPath = obj.path
-				found = true
-			}
-
-			if found {
+		if val,ok := p.cache[CacheKey{&start, open}];ok {
+			if max < val.pressure{
+				max = val.pressure
+				currentPath = val.path
 				continue
 			}
 		}
-
 		pressure, path := p.Find(p.valves[neighbor], minutesLeft-1, releasedPressure, open)
 		if pressure > max {
 			currentPath = path
 			max = pressure
 		}
-
-		if _,ok := p.cache[neighbor]; !ok{
-			p.cache[neighbor] = make([]CacheObject,0)
-		}
-		
-		open1 := strings.Split(strings.TrimSpace(open)," ")
-		sort.Strings(open1)
-		p.cache[neighbor] = append(p.cache[neighbor], CacheObject{
-			pressure,
-			minutesLeft,
-			path,
-			strings.Join(open1," "),
-		})
+		p.cache[CacheKey{&start, open}] = CacheValue{pressure, path}
 	}
 
 	return max, fmt.Sprintf("%s (%dmin, %d), %s", start.name, 30-minutesLeft, releasedPressure, currentPath)
@@ -101,7 +73,7 @@ func part1(data []string) int {
 	re := regexp.MustCompile(`^Valve (\w+) has flow rate=(\d+); tunnel(s)? lead(s)? to valve(s)? (.*)$`)
 	p := new(Problem)
 	p.valves = make(map[string]Valve)
-	p.cache = make(map[string][]CacheObject)
+	p.cache = make(map[CacheKey]CacheValue)
 	for _, line := range data {
 		match := re.FindStringSubmatch(line)
 		p.valves[match[1]] = Valve{
