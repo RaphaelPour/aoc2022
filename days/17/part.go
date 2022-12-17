@@ -98,7 +98,7 @@ func Dump(blocked map[Point]struct{}) {
 	fmt.Println("+-------+")
 }
 
-func part1(data string) int {
+func part1(data string, count int) int {
 	// track points that are blocked by rock for collission detection
 	blocked := make(map[Point]struct{})
 
@@ -110,20 +110,17 @@ func part1(data string) int {
 	// TODO: eliminate, we just need to track the height of the heighest instance
 	instances := make([]Instance, 0)
 
+	// floor is zero or the tip of the heighest rock
+	floor := 0
+
 	// direction index to cycle through the input
 	dir := 0
-	for i := 0; len(instances) < 2022; i = (i + 1) % len(rocks) {
+	for i := 0; len(instances) < count; i = (i + 1) % len(rocks) {
 		instance := Instance{&rocks[i], Point{0, 0}}
-
-		// floor is zero or the tip of the heighest rock
-		floor := 0
-		if len(instances) > 0 {
-			floor = instances[len(instances)-1].Top()
-		}
 
 		// move rock to its start position, it can't be blocked there
 		instance.Transform(Point{2, 3 + floor}, dummyMap)
-		// fmt.Println("start with height:", 3+floor)
+		fmt.Println("start with height:", 3+floor)
 		// move rock until stuck
 		for {
 			// apply jet stream
@@ -135,6 +132,10 @@ func part1(data string) int {
 				break
 			}
 
+		}
+
+		if instance.Top() > floor {
+			floor = instance.Top()
 		}
 
 		for _, p := range instance.Points() {
@@ -151,15 +152,7 @@ func part1(data string) int {
 
 	Dump(blocked)
 
-	max := 0
-	for p := range blocked {
-		if p.y > max {
-			max = p.y
-		}
-	}
-	fmt.Println(max)
-
-	return instances[len(instances)-1].Top()
+	return floor
 }
 
 func part2(data string) int {
@@ -167,11 +160,11 @@ func part2(data string) int {
 }
 
 func main() {
-	data := input.LoadString("input1")[0]
+	data := input.LoadString("input")[0]
 
 	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println(part1(data))
+	fmt.Println(part1(data, 2022))
 
 	// fmt.Println("== [ PART 2 ] ==")
-	// fmt.Println(part2(data))
+	// 	fmt.Println(part1(data, 1000000000000))
 }
