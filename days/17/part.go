@@ -106,21 +106,16 @@ func part1(data string, count int) int {
 	// by definition is nothing blocked
 	dummyMap := make(map[Point]struct{})
 
-	// track the rock-instances we already placed
-	// TODO: eliminate, we just need to track the height of the heighest instance
-	instances := make([]Instance, 0)
-
 	// floor is zero or the tip of the heighest rock
 	floor := 0
 
 	// direction index to cycle through the input
 	dir := 0
-	for i := 0; len(instances) < count; i = (i + 1) % len(rocks) {
-		instance := Instance{&rocks[i], Point{0, 0}}
+	for i := 0; i < count; i++ {
+		instance := Instance{&rocks[i%len(rocks)], Point{0, 0}}
 
 		// move rock to its start position, it can't be blocked there
 		instance.Transform(Point{2, 3 + floor}, dummyMap)
-		fmt.Println("start with height:", 3+floor)
 		// move rock until stuck
 		for {
 			// apply jet stream
@@ -141,30 +136,19 @@ func part1(data string, count int) int {
 		for _, p := range instance.Points() {
 			blocked[p] = struct{}{}
 		}
-		// fmt.Println(blocked)
-		// Dump(blocked)
-
-		instances = append(instances, instance)
 	}
 
-	// fmt.Println(instances[0], instances[0].rock)
-	// fmt.Println(blocked)
-
-	Dump(blocked)
-
 	return floor
-}
-
-func part2(data string) int {
-	return 0
 }
 
 func main() {
 	data := input.LoadString("input")[0]
 
-	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println(part1(data, 2022))
+	// fmt.Println("== [ PART 1 ] ==")
+	if part1(data, 2022) != 3197 {
+		fmt.Println("fail")
+	}
 
 	// fmt.Println("== [ PART 2 ] ==")
-	// 	fmt.Println(part1(data, 1000000000000))
+	// fmt.Println(part1(data, 1000000000000))
 }
