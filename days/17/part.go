@@ -112,6 +112,9 @@ func part1(data string, count int) int {
 	// direction index to cycle through the input
 	dir := 0
 	for i := 0; i < count; i++ {
+		if i%1000000 == 0 {
+			fmt.Printf("%f%%\n", 100.0/float64(count)*float64(i))
+		}
 		instance := Instance{&rocks[i%len(rocks)], Point{0, 0}}
 
 		// move rock to its start position, it can't be blocked there
@@ -150,5 +153,5 @@ func main() {
 	}
 
 	// fmt.Println("== [ PART 2 ] ==")
-	// fmt.Println(part1(data, 1000000000000))
+	fmt.Println(part1(data, 1000000000000))
 }
