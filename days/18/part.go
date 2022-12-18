@@ -9,8 +9,24 @@ import (
 	s_strings "github.com/RaphaelPour/stellar/strings"
 )
 
+var (
+	directions = []Point{
+		Point{1, 0, 0},
+		Point{-1, 0, 0},
+		Point{0, 1, 0},
+		Point{0, -1, 0},
+		Point{0, 0, 1},
+		Point{0, 0, -1},
+	}
+)
+
 type Point struct {
 	x, y, z int
+}
+
+type Neighbor struct {
+	point   Point
+	leaking bool
 }
 
 func (p Point) Add(other Point) Point {
@@ -34,21 +50,33 @@ func (p Point) Min(other Point) Point {
 	return p
 }
 
-func (p Point) PossibleNeighbors() []Point {
-	neighbors := make([]Point, 0)
+func (p Point) OutOfBounds(min, max Point) bool {
+	return p.x <= min.x || p.x >= max.x ||
+		p.y <= min.y || p.y >= max.y ||
+		p.z <= min.z || p.z >= max.z
+}
 
-	for _, newPoint := range []Point{
-		p.Add(Point{1, 0, 0}),
-		p.Add(Point{-1, 0, 0}),
-		p.Add(Point{0, 1, 0}),
-		p.Add(Point{0, -1, 0}),
-		p.Add(Point{0, 0, 1}),
-		p.Add(Point{0, 0, -1}),
-	} {
-		neighbors = append(neighbors, newPoint)
+func (p Point) PossibleNeighbors() []Neighbor {
+	neighbors := make([]Neighbor, 0)
+
+	for _, newPoint := range directions {
+		neighbors = append(neighbors, Neighbor{point: newPoint})
 	}
 
 	return neighbors
+}
+
+func (p Point) Terminates(pockets map[Point]int, cubes map[Point]struct{}) bool {
+	for _, dir := range directions {
+		if !p.TerminatesInDirection(dir, pockets, cubes) {
+			return false
+		}
+	}
+	return true
+}
+
+func (p Point) TerminatesInDirection(direction Point, pockets map[Point]int, cubes map[Point]struct{}) bool {
+	return false
 }
 
 func FromLine(line string) Point {
@@ -75,7 +103,7 @@ func part1(data []string) int {
 	sides := 0
 	for cube := range m {
 		for _, neighbor := range cube.PossibleNeighbors() {
-			if _, ok := m[neighbor]; !ok {
+			if _, ok := m[neighbor.point]; !ok {
 				sides++
 			}
 		}
@@ -90,15 +118,17 @@ func part2(data []string) int {
 	m := make(map[Point]struct{})
 	min, max := Point{10, 10, 10}, Point{-10, -10, -10}
 	for _, line := range data {
-		m[FromLine(line)] = struct{}{}
-
+		p := FromLine(line)
+		m[p] = struct{}{}
+		min = min.Min(p)
+		max = max.Max(p)
 	}
 
 	sides := 0
-	maybePocket := make(map[Point]int)
+	maybePocket := make(map[Neighbor]int)
 	for cube := range m {
 		for _, neighbor := range cube.PossibleNeighbors() {
-			if _, ok := m[neighbor]; !ok {
+			if _, ok := m[neighbor.point]; !ok {
 				sides++
 				if _, ok := maybePocket[neighbor]; !ok {
 					maybePocket[neighbor] = 0
@@ -108,31 +138,31 @@ func part2(data []string) int {
 		}
 	}
 
-	// subtract air pockets
-	for pocket, count := range maybePocket {
-		// process 1x1x1 air pockets
-		if count == 6 {
-			sides -= 6
-			continue
-		}
-
-		trapped := true
-		realSides := 0
-		for _, neighbor := range pocket.PossibleNeighbors() {
-			_, ok1 := maybePocket[neighbor]
-			_, ok2 := m[neighbor]
-
-			if !(ok1 || ok2) {
-				trapped = false
-				break
+	change := true
+	for change {
+		change = false
+		// subtract air pockets
+		for pocket, count := range maybePocket {
+			// process 1x1x1 air pockets
+			if count == 6 {
+				sides -= 6
+				continue
 			}
 
-			if ok2 {
-				realSides++
+			for _, neighbor := range pocket.PossibleNeighbors() {
+				neighborPocket, ok := maybePocket[neighbor]
+				if neighbor.point.OutOfBounds() || (ok && neighborPocket.leaking) {
+					pocket.leaking = true
+					change = true
+					break
+				}
 			}
 		}
-		if trapped {
-			sides -= realSides
+	}
+
+	for _, pocket := range maybePocket {
+		if !pocket.leaking {
+			sides--
 		}
 	}
 
