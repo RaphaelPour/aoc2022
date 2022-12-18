@@ -9,6 +9,7 @@ require (
 
 require (
 	github.com/MarkusFreitag/advent-of-code v0.0.0-20221211092608-259fe61ff671 // indirect
+	github.com/RaphaelPour/prettybool v0.3.0 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deadsy/sdfx v0.0.0-20221027125250-c456ed660b0c // indirect

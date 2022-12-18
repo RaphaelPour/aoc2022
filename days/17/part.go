@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/RaphaelPour/prettybool"
 	"github.com/RaphaelPour/stellar/input"
 )
 
@@ -109,11 +110,16 @@ func part1(data string, count int) int {
 	// floor is zero or the tip of the heighest rock
 	floor := 0
 
+	period := len(data) * len(rocks)
+	rest := count % period
+	countOfPeriods := int(count / period)
+	height2Rest := 0
+
 	// direction index to cycle through the input
 	dir := 0
-	for i := 0; i < count; i++ {
-		if i%1000000 == 0 {
-			fmt.Printf("%f%%\n", 100.0/float64(count)*float64(i))
+	for i := 0; i < period; i++ {
+		if i == rest {
+			height2Rest = floor
 		}
 		instance := Instance{&rocks[i%len(rocks)], Point{0, 0}}
 
@@ -129,7 +135,6 @@ func part1(data string, count int) int {
 			if !instance.Transform(Point{0, -1}, blocked) {
 				break
 			}
-
 		}
 
 		if instance.Top() > floor {
@@ -139,19 +144,37 @@ func part1(data string, count int) int {
 		for _, p := range instance.Points() {
 			blocked[p] = struct{}{}
 		}
+
 	}
 
-	return floor
+	fmt.Printf(
+		"%d * %d + %d = %d\n",
+		countOfPeriods, floor, height2Rest,
+		countOfPeriods*floor+height2Rest,
+	)
+	return countOfPeriods*floor + height2Rest
 }
 
 func main() {
-	data := input.LoadString("input")[0]
+	testData := input.LoadString("input1")[0]
+	realData := input.LoadString("input")[0]
 
-	// fmt.Println("== [ PART 1 ] ==")
-	if part1(data, 2022) != 3197 {
-		fmt.Println("fail")
-	}
+	fmt.Println("== [Part 1] ==")
+	testResult1 := part1(testData, 2022)
+	fmt.Printf("\ttest: %d ", testResult1)
+	fmt.Println(prettybool.GetPrettyBool(testResult1 == 3068, "check"))
 
-	// fmt.Println("== [ PART 2 ] ==")
-	fmt.Println(part1(data, 1000000000000))
+	realResult1 := part1(realData, 2022)
+	fmt.Printf("\treal: %d ", realResult1)
+	fmt.Println(prettybool.GetPrettyBool(realResult1 == 3197, "check"))
+
+	fmt.Println("== [Part 2] ==")
+	testResult2 := part1(testData, 1000000000000)
+	fmt.Printf("\ttest: %d ", testResult2)
+	fmt.Println(prettybool.GetPrettyBool(testResult1 == 1514285714288, "check"))
+
+	realResult2 := part1(realData, 1000000000000)
+	fmt.Printf("\treal: %d\n", realResult2)
+
+	fmt.Println("too high: 1569061539984")
 }
