@@ -149,9 +149,9 @@ func part2(data []string) int {
 				continue
 			}
 
-			for _, neighbor := range pocket.PossibleNeighbors() {
-				neighborPocket, ok := maybePocket[neighbor]
-				if neighbor.point.OutOfBounds() || (ok && neighborPocket.leaking) {
+			for _, neighbor := range pocket.point.PossibleNeighbors() {
+				_, ok := maybePocket[neighbor]
+				if neighbor.point.OutOfBounds(min, max) || (ok && neighborPocket.leaking) {
 					pocket.leaking = true
 					change = true
 					break
