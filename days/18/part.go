@@ -24,11 +24,6 @@ type Point struct {
 	x, y, z int
 }
 
-type Neighbor struct {
-	point   Point
-	leaking bool
-}
-
 func (p Point) Add(other Point) Point {
 	p.x += other.x
 	p.y += other.y
@@ -56,27 +51,14 @@ func (p Point) OutOfBounds(min, max Point) bool {
 		p.z <= min.z || p.z >= max.z
 }
 
-func (p Point) PossibleNeighbors() []Neighbor {
-	neighbors := make([]Neighbor, 0)
+func (p Point) PossibleNeighbors() []Point {
+	neighbors := make([]Point, len(directions))
 
-	for _, newPoint := range directions {
-		neighbors = append(neighbors, Neighbor{point: newPoint})
+	for i, newPoint := range directions {
+		neighbors[i] = p.Add(newPoint)
 	}
 
 	return neighbors
-}
-
-func (p Point) Terminates(pockets map[Point]int, cubes map[Point]struct{}) bool {
-	for _, dir := range directions {
-		if !p.TerminatesInDirection(dir, pockets, cubes) {
-			return false
-		}
-	}
-	return true
-}
-
-func (p Point) TerminatesInDirection(direction Point, pockets map[Point]int, cubes map[Point]struct{}) bool {
-	return false
 }
 
 func FromLine(line string) Point {
@@ -103,7 +85,7 @@ func part1(data []string) int {
 	sides := 0
 	for cube := range m {
 		for _, neighbor := range cube.PossibleNeighbors() {
-			if _, ok := m[neighbor.point]; !ok {
+			if _, ok := m[neighbor]; !ok {
 				sides++
 			}
 		}
@@ -116,53 +98,60 @@ func part2(data []string) int {
 
 	// parse all cubes
 	m := make(map[Point]struct{})
-	min, max := Point{10, 10, 10}, Point{-10, -10, -10}
+	max := Point{-10, -10, -10}
+	min := Point{10, 10, 10}
+
 	for _, line := range data {
 		p := FromLine(line)
 		m[p] = struct{}{}
-		min = min.Min(p)
-		max = max.Max(p)
+		max = p.Max(max)
+		min = p.Min(min)
 	}
 
-	sides := 0
-	maybePocket := make(map[Neighbor]int)
-	for cube := range m {
-		for _, neighbor := range cube.PossibleNeighbors() {
-			if _, ok := m[neighbor.point]; !ok {
-				sides++
-				if _, ok := maybePocket[neighbor]; !ok {
-					maybePocket[neighbor] = 0
-				}
-				maybePocket[neighbor]++
-			}
-		}
-	}
+	min = min.Add(Point{-1, -1, -1})
+	max = max.Add(Point{1, 1, 1})
+
+	airCubes := make(map[Point]bool)
+	lavaCubes := make(map[Point]struct{})
+	airCubes[min] = false
 
 	change := true
+	sides := 0
 	for change {
 		change = false
-		// subtract air pockets
-		for pocket, count := range maybePocket {
-			// process 1x1x1 air pockets
-			if count == 6 {
-				sides -= 6
+
+		for cube, processed := range airCubes {
+			if processed {
 				continue
 			}
 
-			for _, neighbor := range pocket.point.PossibleNeighbors() {
-				_, ok := maybePocket[neighbor]
-				if neighbor.point.OutOfBounds(min, max) || (ok && neighborPocket.leaking) {
-					pocket.leaking = true
-					change = true
-					break
+			change = true
+
+			for _, neighbor := range cube.PossibleNeighbors() {
+				// skip neighbors outside of bounds
+				if max.Max(neighbor) != max || min.Min(neighbor) != min {
+					continue
+				}
+
+				// skip already found air cubes
+				if _, ok := airCubes[neighbor]; ok {
+					continue
+				}
+
+				// add side and continue
+				if _, ok := lavaCubes[neighbor]; ok {
+					sides++
+					continue
+				}
+
+				if _, ok := m[neighbor]; ok {
+					lavaCubes[neighbor] = struct{}{}
+					sides++
+				} else {
+					airCubes[neighbor] = false
 				}
 			}
-		}
-	}
-
-	for _, pocket := range maybePocket {
-		if !pocket.leaking {
-			sides--
+			airCubes[cube] = true
 		}
 	}
 
@@ -177,6 +166,6 @@ func main() {
 
 	fmt.Println("== [ PART 2 ] ==")
 	fmt.Println(part2(data))
-	fmt.Println("bad: 2987")
+	fmt.Println("bad: 2571, 2987")
 	fmt.Println("too high: 3719")
 }
