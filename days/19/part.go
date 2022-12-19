@@ -9,58 +9,58 @@ import (
 )
 
 var (
-	robotMap = map[string]Cost{
-		"ore":      Cost{ore: 1},
-		"clay":     Cost{clay: 1},
-		"obsidian": Cost{obsidian: 1},
-		"geode":    Cost{geode: 1},
+	robotMap = map[string]Material{
+		"ore":      Material{ore: 1},
+		"clay":     Material{clay: 1},
+		"obsidian": Material{obsidian: 1},
+		"geode":    Material{geode: 1},
 	}
 )
 
 type CacheKey struct {
-	cost, robots Cost
+	cost, robots Material
 	minutesLeft  int
 }
 
-type Cost struct {
+type Material struct {
 	ore, clay, obsidian, geode int
 }
 
-func (c Cost) String() string {
+func (m Material) String() string {
 	return fmt.Sprintf(
 		"ore=%d clay=%d obsidian=%d geode=%d",
-		c.ore, c.clay, c.obsidian, c.geode,
+		m.ore, m.clay, m.obsidian, m.geode,
 	)
 }
 
-func (stock Cost) IsAffordable(cost Cost) bool {
+func (stock Material) IsAffordable(cost Material) bool {
 	return stock.ore >= cost.ore &&
 		stock.clay >= cost.clay &&
 		stock.obsidian >= cost.obsidian
 }
 
-func (c Cost) Add(other Cost) Cost {
-	c.ore += other.ore
-	c.clay += other.clay
-	c.obsidian += other.obsidian
-	c.geode += other.geode
-	return c
+func (m Material) Add(other Material) Material {
+	m.ore += other.ore
+	m.clay += other.clay
+	m.obsidian += other.obsidian
+	m.geode += other.geode
+	return m
 }
 
-func (c Cost) Sub(other Cost) Cost {
-	c.ore -= other.ore
-	c.clay -= other.clay
-	c.obsidian -= other.obsidian
-	c.geode -= other.geode
-	return c
+func (m Material) Sub(other Material) Material {
+	m.ore -= other.ore
+	m.clay -= other.clay
+	m.obsidian -= other.obsidian
+	m.geode -= other.geode
+	return m
 }
 
 type Blueprint struct {
-	materials map[string]Cost
+	materials map[string]Material
 	cache     map[CacheKey]int
 }
 
-func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
+func (b Blueprint) Next(stock, robots Material, minutesLeft int) int {
 	// exit recursion if time has run out
 	if minutesLeft <= 0 {
 		return stock.geode
@@ -69,7 +69,7 @@ func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
 	// collect
 	stock = stock.Add(robots)
 
-	if geodes, ok := b.cache[CacheKey{stock, robots, minutesLeft}];ok{
+	if geodes, ok := b.cache[CacheKey{stock, robots, minutesLeft - 1}]; ok {
 		return geodes
 	}
 
@@ -106,21 +106,21 @@ func part1(data []string) int {
 		match := re.FindAllStringSubmatch(line, -1)
 
 		b := Blueprint{
-			materials: map[string]Cost{
-				"ore":  Cost{ore: s_strings.ToInt(match[1][1])},
-				"clay": Cost{ore: s_strings.ToInt(match[2][1])},
-				"obsidian": Cost{
+			materials: map[string]Material{
+				"ore":  Material{ore: s_strings.ToInt(match[1][1])},
+				"clay": Material{ore: s_strings.ToInt(match[2][1])},
+				"obsidian": Material{
 					ore:  s_strings.ToInt(match[3][1]),
 					clay: s_strings.ToInt(match[4][1]),
 				},
-				"geode": Cost{
+				"geode": Material{
 					ore:      s_strings.ToInt(match[5][1]),
 					obsidian: s_strings.ToInt(match[6][1]),
 				},
 			},
 		}
 		b.cache = make(map[CacheKey]int)
-		sum += (i + 1) * b.Next(Cost{}, Cost{ore: 1}, 24)
+		sum += (i + 1) * b.Next(Material{}, Material{ore: 1}, 24)
 		break
 	}
 
