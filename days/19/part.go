@@ -69,7 +69,7 @@ func (b Blueprint) Next(stock, robots Material, minutesLeft int) int {
 	// collect
 	stock = stock.Add(robots)
 
-	if geodes, ok := b.cache[CacheKey{stock, robots, minutesLeft - 1}]; ok {
+	if geodes, ok := b.cache[CacheKey{stock, robots, minutesLeft}]; ok {
 		return geodes
 	}
 
@@ -89,9 +89,9 @@ func (b Blueprint) Next(stock, robots Material, minutesLeft int) int {
 		panic(maxGeodes)
 	}
 
-	if maxGeodes > 10 {
-		b.cache[CacheKey{stock, robots, minutesLeft-1}] = maxGeodes
-		if len(b.cache) % 10000 == 0 {
+	if maxGeodes == 0 {
+		b.cache[CacheKey{stock, robots, minutesLeft - 1}] = 0
+		if len(b.cache)%1000000 == 0 {
 			fmt.Println(len(b.cache))
 		}
 	}
