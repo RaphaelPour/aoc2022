@@ -9,30 +9,41 @@ import (
 	s_strings "github.com/RaphaelPour/stellar/strings"
 )
 
-type Map struct {
-	blocked  map[math.Point[int]]struct{}
-	count    int
-	min, max math.Point[int]
-}
-
-func NewMap() *Map {
-	m := new(Map)
-	m.blocked = make(map[math.Point[int]]struct{})
-	m.min = math.Point[int]{10000, 10000}
-	return m
-}
-
-func (m *Map) Add(p math.Point[int]) {
-	if _, ok := m.blocked[p]; ok {
-		return
+func Max(a, b int) int {
+	if a > b {
+		return a
 	}
-
-	m.blocked[p] = struct{}{}
-	m.count++
+	return b
 }
 
-func Dist(a, b math.Point[int]) int {
-	return math.Abs(a.X-b.X) + math.Abs(a.Y-b.Y)
+type Point struct {
+	x, y int
+}
+
+func (p Point) Add(other Point) Point {
+	p.x += other.x
+	p.y += other.y
+	return p
+}
+
+type Range struct {
+	start, end int
+}
+
+type Rhombus struct {
+	conture map[int]Range
+}
+
+func (r Rhombus) Contains(other Point) (int, bool) {
+	rr, ok := r.conture[other.y]
+	if !ok {
+		return -1, false
+	}
+	return rr.end - other.x + 1, other.x >= rr.start && other.x <= rr.end
+}
+
+func Dist(a, b Point) int {
+	return math.Abs(a.x-b.x) + math.Abs(a.y-b.y)
 }
 
 func part1(data []string) int {
@@ -42,24 +53,23 @@ func part1(data []string) int {
 	for _, line := range data {
 		match := re.FindStringSubmatch(line)
 
-		sensor := math.Point[int]{
+		sensor := Point{
 			s_strings.ToInt(match[1]),
 			s_strings.ToInt(match[2]),
 		}
-		beacon := math.Point[int]{
+		beacon := Point{
 			s_strings.ToInt(match[3]),
 			s_strings.ToInt(match[4]),
 		}
 
 		dist := Dist(sensor, beacon)
-		baseline := math.Point[int]{sensor.X, 2000000}
-		// baseline := math.Point[int]{sensor.X, 10}
+		baseline := Point{sensor.x, 2000000}
 
 		for x := -dist; x <= dist; x++ {
-			newP := sensor.Add(math.Point[int]{x, 0})
-			newP.Y = baseline.Y
-			if Dist(newP, sensor) <= dist { // && newP != beacon{
-				m[newP.X] = struct{}{}
+			newP := sensor.Add(Point{x, 0})
+			newP.y = baseline.y
+			if Dist(newP, sensor) <= dist {
+				m[newP.x] = struct{}{}
 			}
 		}
 	}
@@ -67,57 +77,73 @@ func part1(data []string) int {
 	return len(m)
 }
 
-func part2(data []string) int {
+func part2(data []string, count int) int {
 	re := regexp.MustCompile(`x=([-\d]+), y=([-\d]+).*x=([-\d]+), y=([-\d]+)`)
 
-	m := make(map[math.Point[int]]struct{})
-	for _, line := range data {
-		fmt.Println(line)
+	rhombusList := make([]Rhombus, len(data))
+	for i, line := range data {
 		match := re.FindStringSubmatch(line)
 
-		sensor := math.Point[int]{
+		sensor := Point{
 			s_strings.ToInt(match[1]),
 			s_strings.ToInt(match[2]),
 		}
-		beacon := math.Point[int]{
+		beacon := Point{
 			s_strings.ToInt(match[3]),
 			s_strings.ToInt(match[4]),
 		}
 
-		dist := Dist(sensor, beacon)+1
+		dist := Dist(sensor, beacon)
 
-		for y := -dist; y <= dist; y++{
-			for x := -dist; x <= dist; x++ {
-				newP := sensor.Add(math.Point[int]{x, y})
+		r := Rhombus{}
+		r.conture = make(map[int]Range)
 
-				d := Dist(newP, sensor)
-				if _, ok := m[newP]; ok  && d < dist {
-					delete(m, newP)
-				} else if d == dist { // && newP != beacon{
-					m[newP] = struct{}{}
+		for i := 0; i <= dist; i++ {
+			r.conture[sensor.y+i] = Range{
+				start: sensor.x - dist + i,
+				end:   sensor.x + dist - i,
+			}
+			r.conture[sensor.y-i] = Range{
+				start: sensor.x - dist + i,
+				end:   sensor.x + dist - i,
+			}
+		}
+
+		rhombusList[i] = r
+	}
+
+	fmt.Println("scanning")
+
+	for y := 0; y <= count; y++ {
+		if y%100000 == 0 {
+			fmt.Print(".")
+		}
+		for x := 0; x <= count; {
+			skipped := false
+			for _, r := range rhombusList {
+				if skip, ok := r.Contains(Point{x, y}); ok {
+					// fmt.Println("skip", skip, "to", x+skip)
+					x += skip
+					skipped = true
+					break
 				}
+			}
+			if !skipped {
+				fmt.Println(x, y)
+				return x*4000000 + y
 			}
 		}
 	}
 
-	if len(m) != 1 {
-		panic(fmt.Sprintf("expected map to have one element, got %d", len(m)))
-	}
-
-	for key := range m {
-		return key.X * 4000000 + key.Y
-	}
-
-	// unreachable code
 	return 0
 }
 
 func main() {
-	data := input.LoadString("input1")
+	data := input.LoadString("input")
 
-	// fmt.Println("== [ PART 1 ] ==")
-	// fmt.Println(part1(data))
+	fmt.Println("== [ PART 1 ] ==")
+	fmt.Println(part1(data))
 
 	fmt.Println("== [ PART 2 ] ==")
-	fmt.Println(part2(data))
+	fmt.Println(part2(data, 4000000))
 }
