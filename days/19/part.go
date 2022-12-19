@@ -8,6 +8,10 @@ import (
 	s_strings "github.com/RaphaelPour/stellar/strings"
 )
 
+type CacheKey struct {
+	cost, robots Cost
+}
+
 type Cost struct {
 	ore, clay, obsidian, geode int
 }
@@ -40,83 +44,79 @@ func (c *Cost) Sub(other Cost) {
 	c.geode -= other.geode
 }
 
+func (c Cost) AddNew(other Cost) Cost {
+	c.ore += other.ore
+	c.clay += other.clay
+	c.obsidian += other.obsidian
+	c.geode += other.geode
+	return c
+}
+
+func (c Cost) SubNew(other Cost) Cost{
+	c.ore -= other.ore
+	c.clay -= other.clay
+	c.obsidian -= other.obsidian
+	c.geode -= other.geode
+	return c
+}
+
 func (c *Cost) Buy(other Cost) {
 	c.Sub(other)
 }
 
 type Blueprint struct {
 	ore, clay, obsidian, geode Cost
+	cache map[CacheKey]int
 }
 
-func (b Blueprint) Do(stock,robots Cost, minutesLeft int) int {
-	for minutes := minutesLeft; minutes > 0; minutes-- {
-		fmt.Printf("== Minute %d ==\n", 24- minutes)
-		queue := make([]Cost, 0)
-		// Try build stuff starting with geode
-		if stock.IsAffordable(b.geode) {
-			stock.Buy(b.geode)
-			queue = append(queue, Cost{geode: 1})
-			fmt.Printf("Spend %s to start building a geode robot.\n", b.geode)
-		}
+func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
+	// exit recursion if time has run out
+	if minutesLeft <= 0 {
+		return stock.geode
+	}
 
-		if stock.IsAffordable(b.obsidian) {
-			stock.Buy(b.obsidian)
-			queue = append(queue, Cost{obsidian: 1})
-			fmt.Printf("Spend %s to start building a obsidian robot.\n", b.obsidian)
-		}
+	// collect
+	stock.Add(robots)
 
-		if stock.IsAffordable(b.clay) {
-			stock.Buy(b.clay)
-			queue = append(queue, Cost{clay: 1})
-			fmt.Printf("Spend %s to start building a clay robot.\n", b.clay)
-		}
+	if geodes, ok := b.cache[CacheKey{stock, robots}]; ok {#
+		fmt.Println("HIT")
+		return geodes
+	}
 
-		if stock.IsAffordable(b.ore) {
-			stock.Buy(b.ore)
-			queue = append(queue, Cost{ore: 1})
-			fmt.Printf("Spend %s to start building a ore robot.\n", b.ore)
-		}
-
-		// Collect
-		if robots.ore > 0 {
-			stock.ore += robots.ore
-			fmt.Printf(
-				"%d ore-collecting robot collects %d ore; you now have %d ore.\n",
-				robots.ore, robots.ore, stock.ore,
-			)
-		}
-
-		if robots.clay > 0 {
-			stock.clay += robots.clay
-			fmt.Printf(
-				"%d clay-collecting robot collects %d clay; you now have %d clay.\n",
-				robots.clay, robots.clay, stock.clay,
-			)
-		}
-
-		if robots.obsidian > 0 {
-			stock.obsidian += robots.obsidian
-			fmt.Printf(
-				"%d obsidian-collecting robot collects %d obsidian; you now have %d obsidian.\n",
-				robots.obsidian, robots.obsidian, stock.obsidian,
-			)
-		}
-
-		if robots.geode > 0 {
-			stock.geode += robots.geode
-			fmt.Printf(
-				"%d geode-cracking robot collects %d geode; you now have %d geode.\n",
-				robots.geode, robots.geode, stock.geode,
-			)
-		}
-
-		for _, robot := range queue {
-			robots.Add(robot)
-			fmt.Printf("New robot %s arrived\n", robot)
+	// divide and conquer on buying robots
+	maxGeodes := 0
+	if stock.IsAffordable(b.geode) {
+		if geodes := b.Next(stock.SubNew(b.geode), robots.AddNew(Cost{geode:1}),minutesLeft-1); geodes > maxGeodes{
+			maxGeodes = geodes
 		}
 	}
-	fmt.Println(stock)
-	return stock.geode
+
+	if stock.IsAffordable(b.obsidian) {
+		if geodes := b.Next(stock.SubNew(b.obsidian), robots.AddNew(Cost{obsidian:1}), minutesLeft-1); geodes > maxGeodes{
+			maxGeodes = geodes
+		}
+	}
+
+	if stock.IsAffordable(b.clay) {
+		if geodes := b.Next(stock.SubNew(b.clay), robots.AddNew(Cost{clay:1}),minutesLeft-1); geodes > maxGeodes{
+			maxGeodes = geodes
+		}
+	}
+
+	if stock.IsAffordable(b.ore) {
+		if geodes := b.Next(stock.SubNew(b.ore), robots.AddNew(Cost{ore:1}),minutesLeft-1); geodes > maxGeodes{
+			maxGeodes = geodes
+		}
+	}
+
+	if geodes := b.Next(stock, robots, minutesLeft-1); geodes > maxGeodes{
+		maxGeodes = geodes
+	}
+
+	// add to cache
+	b.cache[CacheKey{stock, robots}] = maxGeodes
+
+	return maxGeodes
 }
 
 func part1(data []string) int {
@@ -136,9 +136,9 @@ func part1(data []string) int {
 				obsidian: s_strings.ToInt(match[6][1]),
 			},
 		}
+		b.cache = make(map[CacheKey]int)
 
-		fmt.Println(b.Do(Cost{}, Cost{ore:1},24))
-		break
+		return b.Next(Cost{}, Cost{ore:1},24)
 	}
 
 	return 0
