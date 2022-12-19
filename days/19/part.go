@@ -8,8 +8,18 @@ import (
 	s_strings "github.com/RaphaelPour/stellar/strings"
 )
 
+var (
+	robotMap = map[string]Cost{
+		"ore": Cost{ore:1},
+		"clay":Cost{clay:1},
+		"obsidian":Cost{obsidian:1},
+		"geode":Cost{geode:1},
+	}
+)
+
 type CacheKey struct {
 	cost, robots Cost
+	minutesLeft int
 }
 
 type Cost struct {
@@ -65,7 +75,7 @@ func (c *Cost) Buy(other Cost) {
 }
 
 type Blueprint struct {
-	ore, clay, obsidian, geode Cost
+	materials map[string]Cost
 	cache map[CacheKey]int
 }
 
@@ -75,46 +85,35 @@ func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
 		return stock.geode
 	}
 
-	fmt.Println(24 - minutesLeft + 1)
-
 	// collect
 	stock.Add(robots)
 
+	if geodes, ok := b.cache[CacheKey{stock, robots, minutesLeft}];ok{
+		return geodes
+	}
+
 	// divide and conquer on buying robots
-	maxGeodes := 0
-	if stock.IsAffordable(b.geode) {
-		fmt.Println(stock)
-		if geodes := b.Next(stock.SubNew(b.geode), robots.AddNew(Cost{geode:1}),minutesLeft-1); geodes > maxGeodes{
+	maxGeodes := b.Next(stock, robots, minutesLeft-1)
+
+	for material, cost := range b.materials {
+		if !stock.IsAffordable(cost) {
+			continue
+		}
+		if geodes := b.Next(stock.SubNew(cost), robots.AddNew(robotMap[material]),minutesLeft-1); geodes > maxGeodes{
 			maxGeodes = geodes
 		}
-	}
-
-	if stock.IsAffordable(b.obsidian) {
-		if geodes := b.Next(stock.SubNew(b.obsidian), robots.AddNew(Cost{obsidian:1}), minutesLeft-1); geodes > maxGeodes{
-			maxGeodes = geodes
-		}
-	}
-
-	if stock.IsAffordable(b.clay) {
-		if geodes := b.Next(stock.SubNew(b.clay), robots.AddNew(Cost{clay:1}),minutesLeft-1); geodes > maxGeodes{
-			maxGeodes = geodes
-		}
-	}
-
-	if stock.IsAffordable(b.ore) {
-		if geodes := b.Next(stock.SubNew(b.ore), robots.AddNew(Cost{ore:1}),minutesLeft-1); geodes > maxGeodes{
-			maxGeodes = geodes
-		}
-	}
-
-	if geodes := b.Next(stock, robots, minutesLeft-1); geodes > maxGeodes{
-		maxGeodes = geodes
 	}
 
 	if maxGeodes > 12 {
-		panic(fmt.Sprintf("%d geodes are too much", maxGeodes))
+		panic(maxGeodes)
 	}
 
+	if maxGeodes > 10 {
+		b.cache[CacheKey{stock, robots, minutesLeft-1}] = maxGeodes
+		if len(b.cache) % 10000 == 0 {
+			fmt.Println(len(b.cache))
+		}
+	}
 
 	return maxGeodes
 }
@@ -126,19 +125,20 @@ func part1(data []string) int {
 		match := re.FindAllStringSubmatch(line, -1)
 
 		b := Blueprint{
-			ore:  Cost{ore: s_strings.ToInt(match[1][1])},
-			clay: Cost{ore: s_strings.ToInt(match[2][1])},
-			obsidian: Cost{
-				ore:  s_strings.ToInt(match[3][1]),
-				clay: s_strings.ToInt(match[4][1]),
-			},
-			geode: Cost{
-				ore:      s_strings.ToInt(match[5][1]),
-				obsidian: s_strings.ToInt(match[6][1]),
+			materials: map[string]Cost{
+				"ore": Cost{ore: s_strings.ToInt(match[1][1])},
+				"clay": Cost{ore: s_strings.ToInt(match[2][1])},
+				"obsidian": Cost{
+					ore:  s_strings.ToInt(match[3][1]),
+					clay: s_strings.ToInt(match[4][1]),
+				},
+				"geode": Cost{
+					ore:      s_strings.ToInt(match[5][1]),
+					obsidian: s_strings.ToInt(match[6][1]),
+				},
 			},
 		}
 		b.cache = make(map[CacheKey]int)
-
 		sum += (i+1) * b.Next(Cost{}, Cost{ore:1},24)
 		break
 	}
