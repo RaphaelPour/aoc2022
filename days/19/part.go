@@ -10,16 +10,16 @@ import (
 
 var (
 	robotMap = map[string]Cost{
-		"ore": Cost{ore:1},
-		"clay":Cost{clay:1},
-		"obsidian":Cost{obsidian:1},
-		"geode":Cost{geode:1},
+		"ore":      Cost{ore: 1},
+		"clay":     Cost{clay: 1},
+		"obsidian": Cost{obsidian: 1},
+		"geode":    Cost{geode: 1},
 	}
 )
 
 type CacheKey struct {
 	cost, robots Cost
-	minutesLeft int
+	minutesLeft  int
 }
 
 type Cost struct {
@@ -35,9 +35,8 @@ func (c Cost) String() string {
 
 func (stock Cost) IsAffordable(cost Cost) bool {
 	return stock.ore >= cost.ore &&
-	       stock.clay >= cost.clay &&
-				 stock.obsidian >= cost.obsidian &&
-				 stock.geode >= cost.geode
+		stock.clay >= cost.clay &&
+		stock.obsidian >= cost.obsidian
 }
 
 func (c Cost) Add(other Cost) Cost {
@@ -58,7 +57,7 @@ func (c Cost) Sub(other Cost) Cost {
 
 type Blueprint struct {
 	materials map[string]Cost
-	cache map[CacheKey]int
+	cache     map[CacheKey]int
 }
 
 func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
@@ -108,7 +107,7 @@ func part1(data []string) int {
 
 		b := Blueprint{
 			materials: map[string]Cost{
-				"ore": Cost{ore: s_strings.ToInt(match[1][1])},
+				"ore":  Cost{ore: s_strings.ToInt(match[1][1])},
 				"clay": Cost{ore: s_strings.ToInt(match[2][1])},
 				"obsidian": Cost{
 					ore:  s_strings.ToInt(match[3][1]),
@@ -121,7 +120,7 @@ func part1(data []string) int {
 			},
 		}
 		b.cache = make(map[CacheKey]int)
-		sum += (i+1) * b.Next(Cost{}, Cost{ore:1},24)
+		sum += (i + 1) * b.Next(Cost{}, Cost{ore: 1}, 24)
 		break
 	}
 
