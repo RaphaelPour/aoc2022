@@ -40,21 +40,7 @@ func (stock Cost) IsAffordable(cost Cost) bool {
 				 stock.geode >= cost.geode
 }
 
-func (c *Cost) Add(other Cost) {
-	c.ore += other.ore
-	c.clay += other.clay
-	c.obsidian += other.obsidian
-	c.geode += other.geode
-}
-
-func (c *Cost) Sub(other Cost) {
-	c.ore -= other.ore
-	c.clay -= other.clay
-	c.obsidian -= other.obsidian
-	c.geode -= other.geode
-}
-
-func (c Cost) AddNew(other Cost) Cost {
+func (c Cost) Add(other Cost) Cost {
 	c.ore += other.ore
 	c.clay += other.clay
 	c.obsidian += other.obsidian
@@ -62,16 +48,12 @@ func (c Cost) AddNew(other Cost) Cost {
 	return c
 }
 
-func (c Cost) SubNew(other Cost) Cost{
+func (c Cost) Sub(other Cost) Cost {
 	c.ore -= other.ore
 	c.clay -= other.clay
 	c.obsidian -= other.obsidian
 	c.geode -= other.geode
 	return c
-}
-
-func (c *Cost) Buy(other Cost) {
-	c.Sub(other)
 }
 
 type Blueprint struct {
@@ -86,7 +68,7 @@ func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
 	}
 
 	// collect
-	stock.Add(robots)
+	stock = stock.Add(robots)
 
 	if geodes, ok := b.cache[CacheKey{stock, robots, minutesLeft}];ok{
 		return geodes
@@ -99,7 +81,7 @@ func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
 		if !stock.IsAffordable(cost) {
 			continue
 		}
-		if geodes := b.Next(stock.SubNew(cost), robots.AddNew(robotMap[material]),minutesLeft-1); geodes > maxGeodes{
+		if geodes := b.Next(stock.Sub(cost), robots.Add(robotMap[material]), minutesLeft-1); geodes > maxGeodes {
 			maxGeodes = geodes
 		}
 	}
