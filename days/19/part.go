@@ -60,41 +60,54 @@ type Blueprint struct {
 	cache     map[CacheKey]int
 }
 
+func (b *Blueprint) Cache(stock, robots Material, geodes, minutesLeft int) {
+	/*if minutesLeft > 20 {
+		return
+	}*/
+
+	if val, ok := b.cache[CacheKey{stock, robots, minutesLeft}]; ok && val > geodes {
+		return
+	}
+
+	b.cache[CacheKey{stock, robots, minutesLeft}] = geodes
+}
+
 func (b Blueprint) Next(stock, robots Material, minutesLeft int) int {
+	if len(b.cache)%100000 == 0 {
+		fmt.Printf("\r%d", len(b.cache))
+	}
+
 	// exit recursion if time has run out
 	if minutesLeft <= 0 {
 		return stock.geode
 	}
 
-	// collect
-	stock = stock.Add(robots)
-
 	if geodes, ok := b.cache[CacheKey{stock, robots, minutesLeft}]; ok {
 		return geodes
 	}
 
+	// collect
+	stock = stock.Add(robots)
+
 	// divide and conquer on buying robots
 	maxGeodes := b.Next(stock, robots, minutesLeft-1)
+	b.Cache(stock, robots, maxGeodes, minutesLeft-1)
 
 	for material, cost := range b.materials {
 		if !stock.IsAffordable(cost) {
 			continue
 		}
-		if geodes := b.Next(stock.Sub(cost), robots.Add(robotMap[material]), minutesLeft-1); geodes > maxGeodes {
+
+		geodes := b.Next(stock.Sub(cost), robots.Add(robotMap[material]), minutesLeft-1)
+		b.Cache(stock.Sub(cost), robots.Add(robotMap[material]), geodes, minutesLeft-1)
+		if geodes > maxGeodes {
 			maxGeodes = geodes
 		}
 	}
 
-	if maxGeodes > 12 {
+	/*if maxGeodes > 9 {
 		panic(maxGeodes)
-	}
-
-	if maxGeodes == 0 {
-		b.cache[CacheKey{stock, robots, minutesLeft - 1}] = 0
-		if len(b.cache)%1000000 == 0 {
-			fmt.Println(len(b.cache))
-		}
-	}
+	}*/
 
 	return maxGeodes
 }
@@ -120,7 +133,9 @@ func part1(data []string) int {
 			},
 		}
 		b.cache = make(map[CacheKey]int)
-		sum += (i + 1) * b.Next(Material{}, Material{ore: 1}, 24)
+		result := b.Next(Material{}, Material{ore: 1}, 24)
+
+		sum += (i + 1) * result
 		break
 	}
 
@@ -135,7 +150,7 @@ func main() {
 	data := input.LoadString("input1")
 
 	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println(part1(data))
+	fmt.Printf("\n%d\n", part1(data))
 
 	// fmt.Println("== [ PART 2 ] ==")
 	// fmt.Println(part2(data))
