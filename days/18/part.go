@@ -45,12 +45,6 @@ func (p Point) Min(other Point) Point {
 	return p
 }
 
-func (p Point) OutOfBounds(min, max Point) bool {
-	return p.x <= min.x || p.x >= max.x ||
-		p.y <= min.y || p.y >= max.y ||
-		p.z <= min.z || p.z >= max.z
-}
-
 func (p Point) PossibleNeighbors() []Point {
 	neighbors := make([]Point, len(directions))
 
@@ -138,12 +132,7 @@ func part2(data []string) int {
 					continue
 				}
 
-				// add side and continue
-				if _, ok := lavaCubes[neighbor]; ok {
-					sides++
-					continue
-				}
-
+				// if neighbor is a solid cube, add it to the lava cubes
 				if _, ok := m[neighbor]; ok {
 					lavaCubes[neighbor] = struct{}{}
 					sides++
@@ -166,6 +155,4 @@ func main() {
 
 	fmt.Println("== [ PART 2 ] ==")
 	fmt.Println(part2(data))
-	fmt.Println("bad: 2571, 2987")
-	fmt.Println("too high: 3719")
 }
