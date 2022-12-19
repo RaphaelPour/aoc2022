@@ -75,17 +75,15 @@ func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
 		return stock.geode
 	}
 
+	fmt.Println(24 - minutesLeft + 1)
+
 	// collect
 	stock.Add(robots)
-
-	if geodes, ok := b.cache[CacheKey{stock, robots}]; ok {#
-		fmt.Println("HIT")
-		return geodes
-	}
 
 	// divide and conquer on buying robots
 	maxGeodes := 0
 	if stock.IsAffordable(b.geode) {
+		fmt.Println(stock)
 		if geodes := b.Next(stock.SubNew(b.geode), robots.AddNew(Cost{geode:1}),minutesLeft-1); geodes > maxGeodes{
 			maxGeodes = geodes
 		}
@@ -113,15 +111,18 @@ func (b Blueprint) Next(stock, robots Cost, minutesLeft int) int {
 		maxGeodes = geodes
 	}
 
-	// add to cache
-	b.cache[CacheKey{stock, robots}] = maxGeodes
+	if maxGeodes > 12 {
+		panic(fmt.Sprintf("%d geodes are too much", maxGeodes))
+	}
+
 
 	return maxGeodes
 }
 
 func part1(data []string) int {
 	re := regexp.MustCompile(`(\d+)`)
-	for _, line := range data {
+	sum := 0
+	for i, line := range data {
 		match := re.FindAllStringSubmatch(line, -1)
 
 		b := Blueprint{
@@ -138,10 +139,11 @@ func part1(data []string) int {
 		}
 		b.cache = make(map[CacheKey]int)
 
-		return b.Next(Cost{}, Cost{ore:1},24)
+		sum += (i+1) * b.Next(Cost{}, Cost{ore:1},24)
+		break
 	}
 
-	return 0
+	return sum
 }
 
 func part2(data []string) int {
