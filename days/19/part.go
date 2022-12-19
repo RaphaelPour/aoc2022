@@ -19,6 +19,13 @@ func (c Cost) String() string {
 	)
 }
 
+func (stock Cost) IsAffordable(cost Cost) bool {
+	return stock.ore >= cost.ore &&
+	       stock.clay >= cost.clay &&
+				 stock.obsidian >= cost.obsidian &&
+				 stock.geode >= cost.geode
+}
+
 func (c *Cost) Add(other Cost) {
 	c.ore += other.ore
 	c.clay += other.clay
@@ -26,39 +33,46 @@ func (c *Cost) Add(other Cost) {
 	c.geode += other.geode
 }
 
+func (c *Cost) Sub(other Cost) {
+	c.ore -= other.ore
+	c.clay -= other.clay
+	c.obsidian -= other.obsidian
+	c.geode -= other.geode
+}
+
+func (c *Cost) Buy(other Cost) {
+	c.Sub(other)
+}
+
 type Blueprint struct {
 	ore, clay, obsidian, geode Cost
 }
 
-func (b Blueprint) Do() int {
-	stock := Cost{}
-	robots := Cost{ore: 1}
-	for minutes := 1; minutes <= 24; minutes++ {
-		fmt.Printf("== Minute %d ==\n", minutes)
+func (b Blueprint) Do(stock,robots Cost, minutesLeft int) int {
+	for minutes := minutesLeft; minutes > 0; minutes-- {
+		fmt.Printf("== Minute %d ==\n", 24- minutes)
 		queue := make([]Cost, 0)
 		// Try build stuff starting with geode
-		if stock.ore >= b.geode.ore && stock.obsidian >= b.geode.obsidian {
-			stock.ore -= b.geode.ore
-			stock.obsidian -= b.geode.obsidian
+		if stock.IsAffordable(b.geode) {
+			stock.Buy(b.geode)
 			queue = append(queue, Cost{geode: 1})
 			fmt.Printf("Spend %s to start building a geode robot.\n", b.geode)
 		}
 
-		if stock.ore >= b.obsidian.ore && stock.clay >= b.obsidian.clay {
-			stock.ore -= b.obsidian.ore
-			stock.clay -= b.obsidian.clay
+		if stock.IsAffordable(b.obsidian) {
+			stock.Buy(b.obsidian)
 			queue = append(queue, Cost{obsidian: 1})
 			fmt.Printf("Spend %s to start building a obsidian robot.\n", b.obsidian)
 		}
 
-		if stock.ore >= b.clay.ore {
-			stock.ore -= b.clay.ore
+		if stock.IsAffordable(b.clay) {
+			stock.Buy(b.clay)
 			queue = append(queue, Cost{clay: 1})
 			fmt.Printf("Spend %s to start building a clay robot.\n", b.clay)
 		}
 
-		if stock.ore >= b.ore.ore {
-			stock.ore -= b.ore.ore
+		if stock.IsAffordable(b.ore) {
+			stock.Buy(b.ore)
 			queue = append(queue, Cost{ore: 1})
 			fmt.Printf("Spend %s to start building a ore robot.\n", b.ore)
 		}
@@ -123,7 +137,7 @@ func part1(data []string) int {
 			},
 		}
 
-		fmt.Println(b.Do())
+		fmt.Println(b.Do(Cost{}, Cost{ore:1},24))
 		break
 	}
 
