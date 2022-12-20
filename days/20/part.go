@@ -28,8 +28,16 @@ func (v *Value) Move(newLeft, newRight *Value) {
 
 func (v Value) GetNeighborN(n int) *Value {
 	current := &v
-	for i := 0; i < n; i++ {
-		current = current.right
+
+	if n > 0 {
+		for i := 0; i < n; i++ {
+			current = current.right
+		}
+		return current
+	}
+
+	for ; n <= 0; n++ {
+		current = current.left
 	}
 	return current
 }
@@ -78,14 +86,8 @@ func part1(data []int) int {
 			if val.number == 0 {
 				continue
 			}
-
-			to := val.number
-			if to < 0 {
-				to = len(data) + to -1
-			}
 			
-			target := val.GetNeighborN(to % len(data))
-
+			target := val.GetNeighborN(val.number)
 			val.Move(target, target.right)
 	}
 
@@ -111,6 +113,7 @@ func main() {
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(input.LoadInt("input1")))
 	fmt.Println(part1(input.LoadInt("input")))
+	fmt.Println("     bad: 0, 10909")
 	fmt.Println("too high: 12787")
 
 	// fmt.Println("== [ PART 2 ] ==")
