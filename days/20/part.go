@@ -26,20 +26,29 @@ func (v *Value) Move(newLeft, newRight *Value) {
 	newRight.left = v
 }
 
-func (v Value) GetNeighborN(n int) *Value {
+func (v Value) RightNeighborN(n int) *Value {
 	current := &v
 
-	if n > 0 {
-		for i := 0; i < n; i++ {
-			current = current.right
-		}
-		return current
+	for i := 0; i < n; i++ {
+		current = current.right
 	}
+	return current
+}
+
+func (v Value) LeftNeighborN(n int) *Value {
+	current := &v
 
 	for ; n <= 0; n++ {
 		current = current.left
 	}
 	return current
+}
+
+func (v Value) GetNeighborN(n int) *Value {
+	if n > 0 {
+		return v.RightNeighborN(n)
+	}
+	return v.LeftNeighborN(n)
 }
 
 func Dump(start *Value) {
@@ -93,7 +102,7 @@ func part1(data []int) int {
 
 	// Dump(start)
 	
-	n1 := zeroValue.GetNeighborN(1000  % len(data)).number
+	n1 := zeroValue.GetNeighborN(1000 % len(data)).number
 	n2 := zeroValue.GetNeighborN(2000 % len(data)).number
 	n3 := zeroValue.GetNeighborN(3000 % len(data)).number
 
