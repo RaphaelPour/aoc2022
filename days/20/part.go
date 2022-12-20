@@ -34,19 +34,30 @@ func (v Value) GetNeighborN(n int) *Value {
 	return current
 }
 
-func Dump(values []*Value) {
-	for _, val := range values {
-		fmt.Println(val)
+func Dump(start *Value) {
+	current := start
+	for {
+		fmt.Printf("%3d", current.number)
+		current = current.right
+		if current == start {
+			break
+		}
 	}
+	fmt.Println("")
 }
 
 func part1(data []int) int {
 	var start *Value
 	var current *Value
-	values := make([]*Value, len(data))
+	var zeroValue *Value
+
+	order := make([]*Value,len(data))
 	for i, originalNumber := range data {
 		val := &Value{number: originalNumber}
-		values[i] = val
+		order[i] = val
+		if originalNumber == 0 {
+			zeroValue = val
+		}
 		if start == nil {
 			start = val
 			current = val
@@ -62,51 +73,30 @@ func part1(data []int) int {
 	// connect start and end to form a doubly-linked ring-list
 	start.left = end
 	end.right = start
-	Dump(values)
-	fmt.Println("parsing [x]")
+	fmt.Println("parsing done.")
 
-	allProcessed := false
-	for !allProcessed {
-		allProcessed = true
-		for _, current := range values {
-			if current.moved {
+	for _, val := range order {
+			// Dump(start)
+			if val.number == 0 {
 				continue
 			}
-			allProcessed = false
 
-			to := current.number - 1
+			to := val.number 
 			if to < 0 {
-				to = len(data) + to - 1
+				to = len(data) + to -1
 			}
 
 			to = to % len(data)
 
-			target := current.GetNeighborN(to)
-			current.Move(target, target.right)
-			current.moved = true
-		}
+			target := val.GetNeighborN(to)
+			val.Move(target, target.right)
 	}
 
-	// Dump(values)
+	// Dump(start)
 
-	var zeroValue *Value
-	current, start = values[0], values[0]
-	for {
-		// fmt.Println(current)
-		if current.number == 0 {
-			zeroValue = current
-			break
-		}
-
-		current = current.right
-		if current == start {
-			break
-		}
-	}
-
-	n1 := zeroValue.GetNeighborN(1000 % len(values))
-	n2 := zeroValue.GetNeighborN(2000 % len(values))
-	n3 := zeroValue.GetNeighborN(3000 % len(values))
+	n1 := zeroValue.GetNeighborN(1000) //  % len(data))
+	n2 := zeroValue.GetNeighborN(2000) // % len(data))
+	n3 := zeroValue.GetNeighborN(3000) // % len(data))
 
 	fmt.Println("n1:", n1.number)
 	fmt.Println("n2:", n2.number)
@@ -120,10 +110,10 @@ func part2(data []string) int {
 }
 
 func main() {
-	data := input.LoadInt("input1")
 
 	fmt.Println("== [ PART 1 ] ==")
-	fmt.Println(part1(data))
+	fmt.Println(part1(input.LoadInt("input")))
+	// fmt.Println(part1(input.LoadInt("input")))
 
 	// fmt.Println("== [ PART 2 ] ==")
 	// fmt.Println(part2(data))
