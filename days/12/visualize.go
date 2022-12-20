@@ -64,6 +64,7 @@ func renderSTL(input []string) {
 func renderHeightMap(input []string) {
 	fmt.Println("width:", len(input[0]))
 	fmt.Println("height:", len(input))
+	_, path := Part2(input)
 	image := image.NewNRGBA(image.Rect(0, 0, len(input[0]), len(input)))
 	for y, row := range input {
 		for x, rawCell := range row {
@@ -71,9 +72,11 @@ func renderHeightMap(input []string) {
 			// 0 should be white and 9 very black
 			// spread the gray values accors the whole range
 			c := uint8(255.0 - (255.0 / float64(cell)))
-			image.Set(x, y,
-				color.NRGBA{R: c, G: c, B: c, A: 255},
-			)
+			clr := color.NRGBA{R: c, G: c, B: c, A: 255}
+			if _, ok := path[Point{x, y}]; ok {
+				clr = color.NRGBA{R: 255, G: 0, B: 0, A: 255}
+			}
+			image.Set(x, y, clr)
 		}
 	}
 
@@ -94,6 +97,7 @@ func main() {
 	flag.Parse()
 
 	input := input.LoadString(*InputFile)
+
 	if *HeightMap {
 		renderHeightMap(input)
 	}
