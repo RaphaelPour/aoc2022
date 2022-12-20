@@ -12,6 +12,53 @@ type Value struct {
 	left, right *Value
 }
 
+type Ring struct {
+	zero *Value
+	values []*Value
+}
+
+func NewRing(data []int) Ring {
+	var start *Value
+	var current *Value
+
+	r := Ring{}
+	r.values = make([]*Value,len(data))
+	for i, originalNumber := range data {
+		val := &Value{number: originalNumber}
+		r.values[i] = val
+		if originalNumber == 0 {
+			r.zero = val
+		}
+		if start == nil {
+			start = val
+			current = val
+			continue
+		}
+		current.right = val
+		val.left = current
+		current = val
+	}
+
+	end := current
+
+	// connect start and end to form a doubly-linked ring-list
+	start.left = end
+	end.right = start
+
+	return r
+}
+
+func (r *Ring) Mix() {
+	for _, val := range r.values {
+			if val.number == 0 {
+				continue
+			}
+			
+			target := val.GetNeighborN(val.number)
+			val.Move(target, target.right)
+	}
+}
+
 func (v *Value) Move(newLeft, newRight *Value) {
 	// connect neighbors of subject's old position
 	v.left.right = v.right
@@ -64,47 +111,12 @@ func Dump(start *Value) {
 }
 
 func part1(data []int) int {
-	var start *Value
-	var current *Value
-	var zeroValue *Value
+	ring := NewRing(data)
+	ring.Mix()
 
-	order := make([]*Value,len(data))
-	for i, originalNumber := range data {
-		val := &Value{number: originalNumber}
-		order[i] = val
-		if originalNumber == 0 {
-			zeroValue = val
-		}
-		if start == nil {
-			start = val
-			current = val
-			continue
-		}
-		current.right = val
-		val.left = current
-		current = val
-	}
-
-	end := current
-
-	// connect start and end to form a doubly-linked ring-list
-	start.left = end
-	end.right = start
-
-	for _, val := range order {
-			if val.number == 0 {
-				continue
-			}
-			
-			target := val.GetNeighborN(val.number)
-			val.Move(target, target.right)
-	}
-
-	// Dump(start)
-	
-	n1 := zeroValue.GetNeighborN(1000 % len(data)).number
-	n2 := zeroValue.GetNeighborN(2000 % len(data)).number
-	n3 := zeroValue.GetNeighborN(3000 % len(data)).number
+	n1 := ring.zero.GetNeighborN(1000 % len(data)).number
+	n2 := ring.zero.GetNeighborN(2000 % len(data)).number
+	n3 := ring.zero.GetNeighborN(3000 % len(data)).number
 
 	fmt.Println("n1:", n1)
 	fmt.Println("n2:", n2)
