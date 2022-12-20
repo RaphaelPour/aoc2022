@@ -73,36 +73,33 @@ func part1(data []int) int {
 	// connect start and end to form a doubly-linked ring-list
 	start.left = end
 	end.right = start
-	fmt.Println("parsing done.")
 
 	for _, val := range order {
-			// Dump(start)
 			if val.number == 0 {
 				continue
 			}
 
-			to := val.number 
+			to := val.number
 			if to < 0 {
 				to = len(data) + to -1
 			}
+			
+			target := val.GetNeighborN(to % len(data))
 
-			to = to % len(data)
-
-			target := val.GetNeighborN(to)
 			val.Move(target, target.right)
 	}
 
 	// Dump(start)
+	
+	n1 := zeroValue.GetNeighborN(1000  % len(data)).number
+	n2 := zeroValue.GetNeighborN(2000 % len(data)).number
+	n3 := zeroValue.GetNeighborN(3000 % len(data)).number
 
-	n1 := zeroValue.GetNeighborN(1000) //  % len(data))
-	n2 := zeroValue.GetNeighborN(2000) // % len(data))
-	n3 := zeroValue.GetNeighborN(3000) // % len(data))
+	fmt.Println("n1:", n1)
+	fmt.Println("n2:", n2)
+	fmt.Println("n3:", n3)
 
-	fmt.Println("n1:", n1.number)
-	fmt.Println("n2:", n2.number)
-	fmt.Println("n3:", n3.number)
-
-	return n1.number + n2.number + n3.number
+	return n1 + n2 + n3
 }
 
 func part2(data []string) int {
@@ -112,8 +109,9 @@ func part2(data []string) int {
 func main() {
 
 	fmt.Println("== [ PART 1 ] ==")
+	fmt.Println(part1(input.LoadInt("input1")))
 	fmt.Println(part1(input.LoadInt("input")))
-	// fmt.Println(part1(input.LoadInt("input")))
+	fmt.Println("too high: 12787")
 
 	// fmt.Println("== [ PART 2 ] ==")
 	// fmt.Println(part2(data))
