@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/RaphaelPour/stellar/input"
 	s_strings "github.com/RaphaelPour/stellar/strings"
@@ -106,19 +107,17 @@ func ResolveWithHuman(start Monkey, num int, monkeys map[string]Monkey, humanMap
 
 func HumanPath(start Monkey, monkeys map[string]Monkey) ([]string, bool) {
 	if start.name == "humn" {
-		return nil, true
+		return []string{start.name}, true
 	} else if start.terminal {
 		return nil, false
 	}
 
-	left, ok := HumanPath(monkeys[start.first], monkeys)
-	if ok {
-		return append([]string{start.name}, left...), true
+	if left, ok := HumanPath(monkeys[start.first], monkeys); ok{
+		return append(left, start.name), true
 	}
 
-	right, ok := HumanPath(monkeys[start.second], monkeys)
-	if ok {
-		return append([]string{start.name}, right...), true
+	if right, ok := HumanPath(monkeys[start.second], monkeys); ok {
+		return append(right, start.name), true
 	}
 
 	return nil, false
@@ -138,12 +137,13 @@ func part2(root Monkey, monkeys map[string]Monkey) int {
 		pathMap[node] = struct{}{}
 	}
 
-	for i := 0; ; i++ {
-		if (i+1)%1000000 == 0 {
-			fmt.Println(i)
-		}
+	start := time.Now()
+	for i := 3221245500000 ; ; i++{
 		a := ResolveWithHuman(monkeys[root.first], i, monkeys, pathMap)
 		b := ResolveWithHuman(monkeys[root.second], i, monkeys, pathMap)
+		if (i+1)%100000 == 0 {
+			fmt.Printf("i=%d t=%s |c|=%d a=%d b=%d d=%d\n", i, time.Since(start), len(cache),a,b,a-b)
+		}
 		if a == b {
 			fmt.Println("EQUALIY!", a, b)
 			return i
@@ -155,7 +155,7 @@ func part2(root Monkey, monkeys map[string]Monkey) int {
 func main() {
 	monkeys := make(map[string]Monkey)
 	var root Monkey
-	for _, line := range input.LoadString("input1") {
+	for _, line := range input.LoadString("input") {
 		m := NewMonkey(line)
 		monkeys[m.name] = m
 
