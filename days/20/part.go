@@ -55,7 +55,12 @@ func (r *Ring) Mix() {
 			}
 			
 			target := val.GetNeighborN(val.number)
-			val.Move(target, target.right)
+
+			if val.number > 0 {
+				val.Move(target, target.right)
+			} else {
+				val.Move(target.left, target)
+			}
 	}
 }
 
@@ -76,7 +81,7 @@ func (v *Value) Move(newLeft, newRight *Value) {
 func (v Value) RightNeighborN(n int) *Value {
 	current := &v
 
-	for i := 0; i < n; i++ {
+	for ; n > 0; n-- {
 		current = current.right
 	}
 	return current
@@ -85,23 +90,25 @@ func (v Value) RightNeighborN(n int) *Value {
 func (v Value) LeftNeighborN(n int) *Value {
 	current := &v
 
-	for ; n <= 0; n++ {
+	for ; n > 0; n-- {
 		current = current.left
 	}
 	return current
 }
 
 func (v Value) GetNeighborN(n int) *Value {
-	if n > 0 {
+	if n == 0 {
+		return &v
+	} else if  n > 0 {
 		return v.RightNeighborN(n)
 	}
-	return v.LeftNeighborN(n)
+	return v.LeftNeighborN(-n)
 }
 
 func Dump(start *Value) {
 	current := start
 	for {
-		fmt.Printf("%3d", current.number)
+		fmt.Printf("%3d,", current.number)
 		current = current.right
 		if current == start {
 			break
@@ -115,9 +122,9 @@ func part1(data []int) int {
 	ring.Mix()
 
 	n1 := ring.zero.GetNeighborN(1000 % len(data)).number
-	n2 := ring.zero.GetNeighborN(2000 % len(data)).number
 	n3 := ring.zero.GetNeighborN(3000 % len(data)).number
-
+	n2 := ring.zero.GetNeighborN(2000 % len(data)).number
+	
 	fmt.Println("n1:", n1)
 	fmt.Println("n2:", n2)
 	fmt.Println("n3:", n3)
@@ -134,7 +141,7 @@ func main() {
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(input.LoadInt("input1")))
 	fmt.Println(part1(input.LoadInt("input")))
-	fmt.Println("     bad: 0, 10909")
+	fmt.Println("     bad: 0,646, 963, 10909")
 	fmt.Println("too high: 12787")
 
 	// fmt.Println("== [ PART 2 ] ==")
