@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/MarkusFreitag/advent-of-code/util"
+	"github.com/RaphaelPour/stellar/strings"
 	"github.com/fatih/color"
 )
 
@@ -19,7 +20,12 @@ const (
 )
 
 func main() {
-	day := time.Now().Day()
+	var day int
+	if len(os.Args) == 2 {
+		day = strings.ToInt(os.Args[1])
+	} else {
+		day = time.Now().Day()
+	}
 	fmt.Printf("downloading %d/%d\n", day, YEAR)
 
 	/* download input */
