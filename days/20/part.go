@@ -140,7 +140,7 @@ func main() {
 	fmt.Println("== [ PART 1 ] ==")
 	fmt.Println(part1(input.LoadInt("input1")))
 	fmt.Println(part1(input.LoadInt("input")))
-	fmt.Println("     bad: 0,646, 963, 10909")
+	fmt.Println("     bad: -8402, 0, 646, 963, 10909")
 	fmt.Println("too high: 12787")
 
 	// fmt.Println("== [ PART 2 ] ==")
