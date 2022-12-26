@@ -12,7 +12,7 @@ type Value struct {
 }
 
 type Ring struct {
-	zero *Value
+	zero   *Value
 	values []*Value
 }
 
@@ -21,7 +21,7 @@ func NewRing(data []int) Ring {
 	var current *Value
 
 	r := Ring{}
-	r.values = make([]*Value,len(data))
+	r.values = make([]*Value, len(data))
 	for i, originalNumber := range data {
 		val := &Value{number: originalNumber}
 		r.values[i] = val
@@ -49,17 +49,17 @@ func NewRing(data []int) Ring {
 
 func (r *Ring) Mix() {
 	for _, val := range r.values {
-			if val.number == 0 {
-				continue
-			}
-			
-			target := val.GetNeighborN(val.number)
+		if val.number == 0 {
+			continue
+		}
 
-			if val.number > 0 {
-				val.Move(target, target.right)
-			} else {
-				val.Move(target.left, target)
-			}
+		target := val.GetNeighborN(val.number)
+
+		if val.number > 0 {
+			val.Move(target, target.right)
+		} else {
+			val.Move(target.left, target)
+		}
 	}
 }
 
@@ -98,7 +98,7 @@ func (v Value) LeftNeighborN(n int) *Value {
 func (v Value) GetNeighborN(n int) *Value {
 	if n == 0 {
 		return &v
-	} else if  n > 0 {
+	} else if n > 0 {
 		return v.RightNeighborN(n)
 	}
 	return v.LeftNeighborN(-n)
@@ -123,7 +123,7 @@ func part1(data []int) int {
 	n1 := ring.zero.GetNeighborN(1000 % len(data)).number
 	n3 := ring.zero.GetNeighborN(3000 % len(data)).number
 	n2 := ring.zero.GetNeighborN(2000 % len(data)).number
-	
+
 	fmt.Println("n1:", n1)
 	fmt.Println("n2:", n2)
 	fmt.Println("n3:", n3)
