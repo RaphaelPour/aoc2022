@@ -8,7 +8,6 @@ import (
 
 type Value struct {
 	number      int
-	moved       bool
 	left, right *Value
 }
 
