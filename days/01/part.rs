@@ -2,10 +2,11 @@ use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 use std::cmp; 
 
-// based on https://doc.rust-lang.org/stable/rust-by-example/std_misc/file/read_lines.html
+// https://stackoverflow.com/a/45882510
 fn main() -> io::Result<()> {
     let mut max: i32 = 0;
     let mut sum: i32 = 0;
+
     let file = File::open("input")?;
     let reader = BufReader::new(file);
     for line in reader.lines() {
@@ -15,6 +16,7 @@ fn main() -> io::Result<()> {
                 sum = 0;
                 continue
             }
+            // https://doc.rust-lang.org/std/primitive.str.html#method.parse
             sum += data.parse::<i32>().unwrap();
         }
     }
