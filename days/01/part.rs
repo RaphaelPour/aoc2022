@@ -1,10 +1,10 @@
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
-use std::cmp; 
 
 // https://stackoverflow.com/a/45882510
 fn main() -> io::Result<()> {
-    let mut max: i32 = 0;
+    // https://doc.rust-lang.org/std/vec/struct.Vec.html
+    let mut calories = Vec::new();
     let mut sum: i32 = 0;
 
     // https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#propagating-errors
@@ -12,15 +12,14 @@ fn main() -> io::Result<()> {
         Err(e) => return Err(e),
         Ok(file) => file,
     };
-    let reader = BufReader::new(file);
-    for line in reader.lines() {
+    for line in  BufReader::new(file).lines() {
         let data = match line {
             Err(e) => return Err(e),
             Ok(data) => data,
         };
 
         if data == "" {
-            max = cmp::max(max, sum);
+            calories.push(sum);
             sum = 0;
             continue
         }
@@ -28,8 +27,11 @@ fn main() -> io::Result<()> {
         sum += data.parse::<i32>().unwrap();
     }
     
-    max = cmp::max(max, sum);
-    println!("{}", max);
-
+    calories.push(sum);
+    calories.sort();
+    
+    println!("part1: {}", calories.iter().rev().take(1).sum::<i32>());
+    println!("part2: {}", calories.iter().rev().take(3).sum::<i32>());
+    
     Ok(())
 }
