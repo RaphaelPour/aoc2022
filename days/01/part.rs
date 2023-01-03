@@ -7,7 +7,10 @@ fn main() -> io::Result<()> {
     let mut max: i32 = 0;
     let mut sum: i32 = 0;
 
-    let file = File::open("input")?;
+    let file = match File::open("input"){
+        Err(e) => return Err(e),
+        Ok(file) => file,
+    };
     let reader = BufReader::new(file);
     for line in reader.lines() {
         if let Ok(data) = line {
